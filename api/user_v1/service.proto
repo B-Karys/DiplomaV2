@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package user_v1;
+
+option go_package = "github.com/your_username/your_project/pkg/user_v1";
+
+message UserEditable {
+  string name = 1;
+  string surname = 2;
+  string username = 3;
+  string telegram = 4;
+  string discord = 5;
+  string email = 6;
+  repeated string skills = 7;
+}
+
+message UserServerManaged {
+  int64 id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  bytes password_hash = 3;
+  bool activated = 4;
+  int32 version = 5;
+}
+
