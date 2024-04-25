@@ -6,6 +6,11 @@ package user_v1;
 
 option go_package = "github.com/Kerupie/DiplomaV2/pkg/user_v1";
 
+service UserV1 {
+  rpc Get(GetRequest) returns (GetResponse);
+}
+
+
 message UserEditable {
   string name = 1;
   string surname = 2;
@@ -22,5 +27,17 @@ message UserServerManaged {
   bytes password_hash = 3;
   bool activated = 4;
   int32 version = 5;
+}
+
+message User{
+  UserServerManaged user = 1;
+  UserEditable userInfo = 2;
+}
+
+message GetRequest{
+  int64 id =1;
+}
+message GetResponse{
+  User user = 1;
 }
 
