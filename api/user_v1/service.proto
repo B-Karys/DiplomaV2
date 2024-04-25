@@ -4,7 +4,7 @@ import "google/protobuf/timestamp.proto";
 
 package user_v1;
 
-option go_package = "github.com/your_username/your_project/pkg/user_v1";
+option go_package = "github.com/Kerupie/DiplomaV2/pkg/user_v1";
 
 message UserEditable {
   string name = 1;
