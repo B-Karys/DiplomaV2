@@ -8,8 +8,27 @@ option go_package = "github.com/Kerupie/DiplomaV2/pkg/user_v1";
 
 service UserV1 {
   rpc Get(GetRequest) returns (GetResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc UpdateUser(UserEditable) returns (UserEditable);
+  rpc DeleteUser(GetRequest) returns (Status);
 }
 
+message Status {
+  bool status = 1;
+}
+
+message RegisterRequest{
+  string name = 1;
+  string username = 2;
+  string email = 3;
+  bytes password_hash = 4;
+}
+
+message RegisterResponse{
+  string name = 1;
+  string username = 2;
+  string email = 3;
+}
 
 message UserEditable {
   string name = 1;
@@ -37,6 +56,7 @@ message User{
 message GetRequest{
   int64 id =1;
 }
+
 message GetResponse{
   User user = 1;
 }
