@@ -2,7 +2,7 @@ package data
 
 import (
 	"DiplomaV2/domain/models"
-	"DiplomaV2/repositories"
+	"DiplomaV2/internal/post/repository"
 	"context"
 	"database/sql"
 	"github.com/pkg/errors"
@@ -14,7 +14,7 @@ type postRepository struct {
 	DB *sql.DB
 }
 
-func NewPostRepository(db *sql.DB) repositories.PostRepository {
+func NewPostRepository(db *sql.DB) repository.PostRepository {
 	return &postRepository{DB: db}
 }
 

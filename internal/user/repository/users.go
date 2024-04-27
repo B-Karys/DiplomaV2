@@ -1,8 +1,8 @@
-package repositories
+package repository
 
 import "DiplomaV2/domain/models"
 
-type UsersRepository interface {
+type UserRepository interface {
 	Insert(user *models.User) error
 	GetByID(id int64) (*models.User, error)
 	Get(id int64) (*models.User, error)

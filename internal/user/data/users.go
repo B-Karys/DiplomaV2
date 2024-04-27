@@ -2,8 +2,8 @@ package data
 
 import (
 	"DiplomaV2/domain/models"
+	"DiplomaV2/internal/user/repository"
 	"DiplomaV2/internal/validator"
-	"DiplomaV2/repositories"
 	"context"
 	"crypto/sha256"
 	"database/sql"
@@ -17,7 +17,7 @@ type userRepository struct {
 	DB *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) repositories.UsersRepository {
+func NewUserRepository(db *sql.DB) repository.UserRepository {
 	return &userRepository{DB: db}
 }
 

@@ -2,14 +2,14 @@ package usecase
 
 import (
 	"DiplomaV2/domain/models"
-	"DiplomaV2/repositories"
+	"DiplomaV2/internal/post/repository"
 )
 
 type postUseCaseImpl struct {
-	Repo repositories.PostRepository
+	Repo repository.PostRepository
 }
 
-func NewPostUseCase(repository repositories.PostRepository) PostUseCase {
+func NewPostUseCase(repository repository.PostRepository) PostUseCase {
 	return &postUseCaseImpl{
 		Repo: repository,
 	}
