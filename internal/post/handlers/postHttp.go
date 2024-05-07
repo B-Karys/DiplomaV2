@@ -1,37 +1,78 @@
 package handlers
 
-//
-//import (
-//	"net/http"
-//
-//	"DiplomaV2/domain/models"
-//	"DiplomaV2/usecases"
-//
-//	"github.com/labstack/echo/v4"
-//	"github.com/labstack/gommon/log"
-//)
-//
-//type cockroachHttpHandler struct {
-//	//cockroachUsecase usecases.CockroachUsecase
-//}
-//
-//func NewCockroachHttpHandler(cockroachUsecase usecases.CockroachUsecase) CockroachHandler {
-//	return &cockroachHttpHandler{
-//		//cockroachUsecase: cockroachUsecase,
-//	}
-//}
-//
-//func (h *postHttpHandler) DetectCockroach(c echo.Context) error {
-//	reqBody := new(models.AddCockroachData)
-//
-//	if err := c.Bind(reqBody); err != nil {
-//		log.Errorf("Error binding request body: %v", err)
-//		return response(c, http.StatusBadRequest, "Bad request")
-//	}
-//
-//	if err := h.cockroachUsecase.CockroachDataProcessing(reqBody); err != nil {
-//		return response(c, http.StatusInternalServerError, "Processing data failed")
-//	}
-//
-//	return response(c, http.StatusOK, "Success 🪳🪳🪳")
-//}
+import (
+	"DiplomaV2/domain/models"
+	"DiplomaV2/internal/post/usecase"
+	"github.com/labstack/echo/v4"
+	"net/http"
+)
+
+type postHttpHandler struct {
+	postUsecase usecase.PostUseCase
+}
+
+// Use case layer
+
+// HTTP handler
+func (p postHttpHandler) CreatePost(c echo.Context) error {
+	// Extract user ID from JWT token or any other authentication mechanism
+	//user := c.Get("user").(*jwt.Token)
+	//claims := user.Claims.(jwt.MapClaims)
+	//userID := claims["id"].(string)
+	//
+	//if userID == "" {
+	//	return echo.ErrUnauthorized
+	//}
+
+	// Parse request body
+	var input struct { //future: grpc message
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Type        string `json:"type"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	//userIDInt, err := strconv.ParseInt(userID, 10, 64)
+	//if err != nil {
+	//	println("Error while converting user id to int")
+	//	return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	//}
+	// Create a new Post object
+	post := &models.Post{
+		Name:        input.Name,
+		Description: input.Description,
+		Type:        input.Type,
+		AuthorID:    1,
+	}
+
+	// Call the use case to create a new post
+	err := p.postUsecase.CreatePost(post)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
+	}
+
+	return err
+}
+
+func (p postHttpHandler) updatePost(c echo.Context) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p postHttpHandler) deletePost(c echo.Context) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p postHttpHandler) getPost(c echo.Context) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func NewPostHttpHandler(postUsecase usecase.PostUseCase) PostHandler {
+	return &postHttpHandler{
+		postUsecase: postUsecase,
+	}
+}

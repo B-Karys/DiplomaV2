@@ -1,9 +1,9 @@
 package main
 
 import (
-	"DiplomaV2/cmd/app"
 	"DiplomaV2/config"
 	"DiplomaV2/database"
+	"DiplomaV2/server"
 )
 
 func main() {
@@ -11,5 +11,5 @@ func main() {
 
 	db := database.NewPostgresDatabase(conf)
 
-	app.NewEchoServer(conf, db).Start()
+	server.NewEchoServer(conf, db).Start()
 }

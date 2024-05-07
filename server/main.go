@@ -1,4 +1,4 @@
-package app
+package server
 
 type Server interface {
 	Start()

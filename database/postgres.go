@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
+	"gorm.io/driver/postgres"
 	"sync"
 
 	"DiplomaV2/config"
-	"gorm.io/driver/postgres"
+
 	"gorm.io/gorm"
 )
 
@@ -21,12 +22,12 @@ var (
 func NewPostgresDatabase(conf *config.Config) Database {
 	once.Do(func() {
 		dsn := fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=%s",
+			"host=%s port=%d user=%s password=%s dbname=%s  sslmode=%s TimeZone=%s",
 			conf.Db.Host,
+			conf.Db.Port,
 			conf.Db.User,
 			conf.Db.Password,
 			conf.Db.DBName,
-			conf.Db.Port,
 			conf.Db.SSLMode,
 			conf.Db.TimeZone,
 		)

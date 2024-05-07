@@ -10,6 +10,6 @@ type PostRepository interface {
 	GetByID(id int64) (*models.Post, error)
 	GetByAuthor(authorid int64) ([]*models.Post, error)
 	Delete(id int64) error
-	Update(post *models.Post) error
+	//Update(post *models.Post) error
 	DeleteAllForUser(authorid int64) error
 }

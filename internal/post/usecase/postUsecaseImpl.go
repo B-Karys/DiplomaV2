@@ -23,7 +23,7 @@ func (pos *postUseCaseImpl) CreatePost(post *models.Post) error {
 	return nil
 }
 
-func (pos *postUseCaseImpl) ShowOncePost(id int64) (*models.Post, error) {
+func (pos *postUseCaseImpl) ShowOnePost(id int64) (*models.Post, error) {
 	post, err := pos.Repo.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -39,10 +39,10 @@ func (pos *postUseCaseImpl) DeletePost(id int64) error {
 	return nil
 }
 
-func (pos *postUseCaseImpl) UpdatePost(post *models.Post) error {
-	err := pos.Repo.Update(post)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+//func (pos *postUseCaseImpl) UpdatePost(post *models.Post) error {
+//	err := pos.Repo.Update(post)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
