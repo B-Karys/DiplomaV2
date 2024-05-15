@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"DiplomaV2/domain/models"
-	"DiplomaV2/internal/post/repository"
+	"DiplomaV2/post/models"
+	"DiplomaV2/post/repository"
 )
 
 type postUseCaseImpl struct {
@@ -39,10 +39,10 @@ func (pos *postUseCaseImpl) DeletePost(id int64) error {
 	return nil
 }
 
-//func (pos *postUseCaseImpl) UpdatePost(post *models.Post) error {
-//	err := pos.Repo.Update(post)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
+func (pos *postUseCaseImpl) UpdatePost(post *models.Post) error {
+	err := pos.Repo.Update(post)
+	if err != nil {
+		return err
+	}
+	return nil
+}

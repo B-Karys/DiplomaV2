@@ -1,6 +1,9 @@
 package validator
 
-import "regexp"
+import (
+	"DiplomaV2/user/models"
+	"regexp"
+)
 
 // Declare a regular expression for sanity checking the format of email addresses (we'll
 // use this later in the book). If you're interested, this regular expression pattern is
@@ -63,4 +66,41 @@ func Unique[T comparable](values []T) bool {
 		uniqueValues[value] = true
 	}
 	return len(values) == len(uniqueValues)
+}
+
+func ValidateEmail(v *Validator, email string) {
+	v.Check(email != "", "email", "must be provided")
+	v.Check(Matches(email, EmailRX), "email", "must be a valid email address")
+}
+
+func ValidateUsername(v *Validator, username string) {
+	v.Check(username != "", "username", "must be provided")
+	v.Check(len(username) <= 500, "username", "must not be more than 500 bytes long")
+}
+
+func ValidatePasswordPlaintext(v *Validator, password string) {
+	v.Check(password != "", "password", "must be provided")
+	v.Check(len(password) >= 8, "password", "must be at least 8 bytes long")
+	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
+}
+
+func ValidateUser(v *Validator, user *models.User) {
+	v.Check(user.Name != "", "name", "must be provided")
+	v.Check(len(user.Name) <= 500, "name", "must not be more than 500 bytes long")
+	// Call the standalone ValidateEmail() helper.
+	ValidateEmail(v, user.Email)
+	ValidateUsername(v, user.Username)
+	// If the plaintext password is not nil, call the standalone
+	// ValidatePasswordPlaintext() helper.
+	if user.Password.Plaintext != nil {
+		ValidatePasswordPlaintext(v, *user.Password.Plaintext)
+	}
+	// If the password hash is ever nil, this will be due to a logic error in our
+	// codebase (probably because we forgot to set a password for the user). It's a
+	// useful sanity check to include here, but it's not a problem with the data
+	// provided by the client. So rather than adding an error to the validation map we
+	// raise a panic instead.
+	if user.Password.Hash == nil {
+		panic("missing password hash for user")
+	}
 }

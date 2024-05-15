@@ -2,7 +2,7 @@ package repository
 
 import (
 	"DiplomaV2/database"
-	"DiplomaV2/domain/models"
+	"DiplomaV2/post/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -16,14 +16,7 @@ func NewPostRepository(db database.Database) PostRepository {
 }
 
 func (m postRepository) Insert(post *models.Post) error {
-	data := models.Post{
-		Name:        post.Name,
-		Description: post.Description,
-		Type:        post.Type,
-		AuthorID:    post.AuthorID,
-	}
-
-	result := m.DB.GetDb().Create(data)
+	result := m.DB.GetDb().Create(post)
 	return result.Error
 }
 
@@ -72,32 +65,32 @@ func (m postRepository) Delete(id int64) error {
 	return nil
 }
 
-//func (m postRepository) Update(post *models.Post) error {
-//	//if post.ID < 1 {
-//	//	return gorm.ErrRecordNotFound
-//	//}
-//	//
-//	//// Update the post with Gorm.
-//	//result := m.DB.GetDb().Model(&models.Post{}).
-//	//	Where("id = ? AND version = ?", post.ID, post.Version).
-//	//	Updates(map[string]interface{}{
-//	//		"name":        post.Name,
-//	//		"description": post.Description,
-//	//		"type":        post.Type,
-//	//		"authorid":    post.AuthorID,
-//	//		"version":     gorm.Expr("version + 1"),
-//	//	})
-//	//if result.Error != nil {
-//	//	return result.Error
-//	//}
-//	//
-//	//if result.RowsAffected == 0 {
-//	//	return gorm.ErrRecordNotFound
-//	//}
-//	//
-//	//post.Version++ // Increment the version after successful update.
-//	//return nil
-//}
+func (m postRepository) Update(post *models.Post) error {
+	if post.ID < 1 {
+		return gorm.ErrRecordNotFound
+	}
+
+	// Update the post with Gorm.
+	result := m.DB.GetDb().Model(&models.Post{}).
+		Where("id = ? AND version = ?", post.ID, post.Version).
+		Updates(map[string]interface{}{
+			"name":        post.Name,
+			"description": post.Description,
+			"type":        post.Type,
+			"authorid":    post.AuthorID,
+			"version":     gorm.Expr("version + 1"),
+		})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	post.Version++ // Increment the version after successful update.
+	return nil
+}
 
 func (m postRepository) GetByAuthor(authorid int64) ([]*models.Post, error) {
 	//if authorid < 1 {

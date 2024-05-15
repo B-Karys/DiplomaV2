@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"DiplomaV2/domain/models"
-	"DiplomaV2/internal/post/usecase"
+	"DiplomaV2/post/models"
+	"DiplomaV2/post/usecase"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -10,8 +10,6 @@ import (
 type postHttpHandler struct {
 	postUsecase usecase.PostUseCase
 }
-
-// Use case layer
 
 // HTTP handler
 func (p postHttpHandler) CreatePost(c echo.Context) error {
@@ -49,6 +47,7 @@ func (p postHttpHandler) CreatePost(c echo.Context) error {
 
 	// Call the use case to create a new post
 	err := p.postUsecase.CreatePost(post)
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
 	}
@@ -56,17 +55,17 @@ func (p postHttpHandler) CreatePost(c echo.Context) error {
 	return err
 }
 
-func (p postHttpHandler) updatePost(c echo.Context) error {
+func (p postHttpHandler) UpdatePost(c echo.Context) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p postHttpHandler) deletePost(c echo.Context) error {
+func (p postHttpHandler) DeletePost(c echo.Context) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p postHttpHandler) getPost(c echo.Context) error {
+func (p postHttpHandler) GetPost(c echo.Context) error {
 	//TODO implement me
 	panic("implement me")
 }

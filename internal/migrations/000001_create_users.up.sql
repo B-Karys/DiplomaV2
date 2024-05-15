@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     telegram text,
     discord text,
     email citext UNIQUE NOT NULL,
+    skills text[],
     password_hash bytea NOT NULL,
     activated bool NOT NULL,
     version integer NOT NULL DEFAULT 1
