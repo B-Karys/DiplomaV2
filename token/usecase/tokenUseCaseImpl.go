@@ -19,7 +19,7 @@ var (
 	InvalidPassword = errors.New("Invalid password")
 )
 
-func (t tokenUseCaseImpl) CreateActivationToken(email string) error {
+func (t tokenUseCaseImpl) createActivationToken(email string) error {
 	//token, err := t.tokenRepo.New(user.ID, 1*time.Hour, repository.ScopeActivation)
 	//if token == nil || err != nil {
 	//	return "Token is not created", err
@@ -29,7 +29,7 @@ func (t tokenUseCaseImpl) CreateActivationToken(email string) error {
 	panic("implement me")
 }
 
-func (t tokenUseCaseImpl) CreateAuthenticationToken(email, password string) (string, error) {
+func (t tokenUseCaseImpl) createAuthenticationToken(email, password string) (string, error) {
 	user, err := t.userRepo.GetByEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -73,7 +73,7 @@ func (t tokenUseCaseImpl) CreateAuthenticationToken(email, password string) (str
 	return jwtToken, nil
 }
 
-func (t tokenUseCaseImpl) CreatePasswordResetToken(email string) error {
+func (t tokenUseCaseImpl) createPasswordResetToken(email string) error {
 	//TODO implement me
 	panic("implement me")
 }

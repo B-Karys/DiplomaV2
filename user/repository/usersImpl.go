@@ -85,7 +85,7 @@ func (m userRepository) Update(user *models.User) error {
 		return result.Error
 	}
 
-	return nil
+	return result.Error
 }
 
 func (m userRepository) GetForToken(tokenScope, tokenPlaintext string) (*models.User, error) {

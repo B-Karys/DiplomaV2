@@ -21,6 +21,14 @@ type User struct {
 	Version   int       `json:"-"`
 }
 
+type Token struct {
+	Plaintext string    `gorm:"-"`
+	Hash      []byte    `json:"-"`
+	UserID    int64     `json:"-"`
+	Expiry    time.Time `json:"expiry"`
+	Scope     string    `json:"-"`
+}
+
 type password struct {
 	Plaintext *string `gorm:"-"`
 	Hash      []byte

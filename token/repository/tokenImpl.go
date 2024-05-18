@@ -2,13 +2,11 @@ package repository
 
 import (
 	"DiplomaV2/database"
-	"DiplomaV2/token/models"
+	"DiplomaV2/user/models"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
 	"time"
-
-	"DiplomaV2/internal/validator"
 )
 
 const (
@@ -26,11 +24,11 @@ func (t tokenRepository) New(userID int64, ttl time.Duration, scope string) (*mo
 	if err != nil {
 		return nil, err
 	}
-	err = t.Insert(token)
+	err = t.insert(token)
 	return token, err
 }
 
-func (t tokenRepository) Insert(token *models.Token) error {
+func (t tokenRepository) insert(token *models.Token) error {
 	if err := t.DB.GetDb().Create(token).Error; err != nil {
 		return err
 	}
@@ -66,9 +64,4 @@ func generateToken(userID int64, ttl time.Duration, scope string) (*models.Token
 	hash := sha256.Sum256([]byte(token.Plaintext))
 	token.Hash = hash[:]
 	return token, nil
-}
-
-func ValidateTokenPlaintext(v *validator.Validator, tokenPlaintext string) {
-	v.Check(tokenPlaintext != "", "token", "must be provided")
-	v.Check(len(tokenPlaintext) == 26, "token", "must be 26 bytes long")
 }
