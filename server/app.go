@@ -7,10 +7,10 @@ import (
 	postModels "DiplomaV2/post/models"
 	postRepositories "DiplomaV2/post/repository"
 	postUseCases "DiplomaV2/post/usecase"
-	tokenRepositories "DiplomaV2/token/repository"
 	userHandlers "DiplomaV2/user/handlers"
 	userModels "DiplomaV2/user/models"
 	userRepositories "DiplomaV2/user/repository"
+	tokenRepositories "DiplomaV2/user/tokenRepository"
 	userUseCases "DiplomaV2/user/usecase"
 	"fmt"
 	"github.com/labstack/echo/v4"
@@ -90,10 +90,11 @@ func (s *echoServer) initializeUserHttpHandler() {
 	userRouters := s.app.Group("/v2/users")
 	{
 		userRouters.POST("/", userHttpHandler.Registration)
+		userRouters.PUT("/", userHttpHandler.Activation)
+		userRouters.POST("/login", userHttpHandler.Authentication)
 		//userRouters.GET("/", userHttpHandler.GetUserInfo)
 		//userRouters.PATCH("/", userHttpHandler.UpdateUserInfo, middleware2.LoginMiddleware)
 		//userRouters.DELETE("/", userHttpHandler.DeleteUser, middleware2.LoginMiddleware)
-		userRouters.PATCH("/", userHttpHandler.Activation, middleware2.LoginMiddleware)
 		//userRouters.PATCH("/", userHttpHandler.ResetPassword)
 
 	}

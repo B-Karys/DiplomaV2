@@ -7,10 +7,11 @@ import (
 type UserUseCase interface {
 	Registration(user *models.User) (*models.Token, error)
 	Activation(token string) error
-	Authentication(email, password string) error
-	ResetPassword(email string) error
+	Authentication(user *models.User) (string, error)
+	GetUserById(id int64) (*models.User, error)
+	GetUserByEmail(email string) (*models.User, error)
 	UpdateUser(user *models.User) error
+	ChangePassword(user *models.User) error
+	ResetPassword(email string) error
 	DeleteUser(id int64) error
-	ShowUserById(id int64) (*models.User, error)
-	ShowUserByEmail(email string) (*models.User, error)
 }

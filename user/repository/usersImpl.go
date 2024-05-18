@@ -23,11 +23,8 @@ var (
 )
 
 func (m userRepository) Insert(user *models.User) error {
-	// Use GORM's Create method to insert a new record
-	result := m.DB.GetDb().Create(user)
-	// Check for errors
+	result := m.DB.GetDb().Create(user).Scan(user)
 	if result.Error != nil {
-		println("user couldn't be created at repo impl")
 		switch {
 		case result.Error.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
@@ -35,7 +32,7 @@ func (m userRepository) Insert(user *models.User) error {
 			return result.Error
 		}
 	}
-	return result.Error
+	return nil
 }
 
 func (m userRepository) GetByID(id int64) (*models.User, error) {
@@ -78,14 +75,14 @@ func (m userRepository) GetByEmail(email string) (*models.User, error) {
 }
 
 func (m userRepository) Update(user *models.User) error {
-	// Use GORM's Save method to update the user
+	// Use GORM's Updates method to update the user
 	result := m.DB.GetDb().Save(user)
 	// Check for errors
 	if result.Error != nil {
 		return result.Error
 	}
 
-	return result.Error
+	return nil
 }
 
 func (m userRepository) GetForToken(tokenScope, tokenPlaintext string) (*models.User, error) {
@@ -99,7 +96,6 @@ func (m userRepository) GetForToken(tokenScope, tokenPlaintext string) (*models.
 		Where("tokens.hash = ?", tokenHash[:]).
 		Where("tokens.scope = ?", tokenScope).
 		Where("tokens.expiry > ?", time.Now()).
-		Select("users.name, users.username, users.email, users.skills").
 		First(&user)
 
 	// Check for errors

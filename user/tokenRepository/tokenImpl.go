@@ -1,4 +1,4 @@
-package repository
+package tokenRepository
 
 import (
 	"DiplomaV2/database"

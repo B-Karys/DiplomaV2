@@ -12,6 +12,8 @@ import (
 
 var (
 	ErrFailedValidation = errors.New("Failed Validation")
+	ErrWrongCredentials = errors.New("Wrong Credentials")
+	ErrWrongPassword    = errors.New("Wrong Password")
 )
 
 type userHttpHandler struct {
@@ -19,31 +21,88 @@ type userHttpHandler struct {
 	mailer      mailer.Mailer
 }
 
+func (u userHttpHandler) Authentication(c echo.Context) error {
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	}
+
+	v := validator.New()
+	validator.ValidateEmail(v, input.Email)
+	validator.ValidatePasswordPlaintext(v, input.Password)
+	if !v.Valid() {
+		return c.JSON(http.StatusBadRequest, ErrWrongCredentials.Error())
+	}
+
+	user, err := u.userUsecase.GetUserByEmail(input.Email)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ErrWrongCredentials.Error())
+	}
+
+	match, err := user.Password.Matches(input.Password)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ErrWrongPassword.Error())
+	}
+
+	if !match {
+		return c.JSON(http.StatusBadRequest, ErrWrongPassword.Error())
+	}
+
+	token, err := u.userUsecase.Authentication(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ErrWrongCredentials.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"authentication_token": token})
+}
+
 func (u userHttpHandler) Activation(c echo.Context) error {
 	var input struct {
 		TokenPlaintext string `json:"token"`
 	}
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrFailedValidation)
+		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
 	}
 
 	v := validator.New()
 	if validator.ValidateTokenPlaintext(v, input.TokenPlaintext); !v.Valid() {
-		return c.JSON(http.StatusBadRequest, ErrFailedValidation)
+		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
 	}
 
 	err := u.userUsecase.Activation(input.TokenPlaintext)
 	if err != nil {
 		println("activation error: " + err.Error())
-		return c.JSON(http.StatusInternalServerError, ErrFailedValidation)
+		return c.JSON(http.StatusInternalServerError, ErrFailedValidation.Error())
 	}
 
-	return c.JSON(http.StatusAccepted, map[string]interface{}{})
+	return c.JSON(http.StatusAccepted, map[string]interface{}{"message": "Activation successful"})
 }
 
 func (u userHttpHandler) ResetPassword(c echo.Context) error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (u userHttpHandler) ChangePassword(c echo.Context) error {
+	/*
+		var input struct {
+			currentPassword string `json:"currentPassword"`
+			newPassword     string `json:"newPassword"`
+			repeatNewPass   string `json:"repeatNewPass"`
+		}
+		if err := c.Bind(&input); err != nil {
+			return c.JSON(http.StatusBadRequest, ErrFailedValidation)
+		}
+		v := validator.New()
+		if validator.ValidateTokenPlaintext(v, input.currentPassword); !v.Valid() {
+			return c.JSON(http.StatusBadRequest, ErrFailedValidation)
+		}
+		//TODO implement me with middleware
+	*/
+	return nil
 }
 
 func (u userHttpHandler) Registration(c echo.Context) error {
@@ -119,7 +178,7 @@ func (u userHttpHandler) GetUserInfoByEmail(c echo.Context) error {
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-	user, err := u.userUsecase.ShowUserByEmail(input.Email)
+	user, err := u.userUsecase.GetUserByEmail(input.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
@@ -133,7 +192,7 @@ func (u userHttpHandler) GetUserInfoById(c echo.Context) error {
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-	user, err := u.userUsecase.ShowUserById(input.Id)
+	user, err := u.userUsecase.GetUserById(input.Id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
