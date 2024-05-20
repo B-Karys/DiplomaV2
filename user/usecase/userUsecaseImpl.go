@@ -16,7 +16,6 @@ type userUseCaseImpl struct {
 }
 
 var (
-	InvalidPassword     = errors.New("Invalid password")
 	TokenCreationFailed = errors.New("Token creation failed")
 )
 
@@ -49,11 +48,13 @@ func (u *userUseCaseImpl) ResetPassword(email string) error {
 }
 
 func (u *userUseCaseImpl) Authentication(user *models.User) (string, error) {
+
 	token, err := u.createAuthenticationToken(user)
 	if err != nil {
-		return "Token is not created", err
+		return TokenCreationFailed.Error(), err
 	}
 	return token, nil
+
 }
 
 func (u *userUseCaseImpl) Registration(user *models.User) (*models.Token, error) {
@@ -119,7 +120,7 @@ func (u *userUseCaseImpl) createAuthenticationToken(user *models.User) (string, 
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 	jwtToken, err := token.SignedString(jwtSecret)
 	if err != nil {
-		return "Error while Creating Token", err
+		return TokenCreationFailed.Error(), err
 	}
 
 	// Optionally create a record in the token tokenRepository

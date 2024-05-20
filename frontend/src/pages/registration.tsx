@@ -1,46 +1,61 @@
-import {
-    TextInput,
-    PasswordInput,
-    Anchor,
-    Paper,
-    Title,
-    Text,
-    Container,
-    Group,
-    Button,
-} from '@mantine/core';
+import React, { useState } from 'react';
+import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Group, Button } from '@mantine/core';
 import '@mantine/core/styles.css';
 import classes from './authentication.module.css';
-import {SetStateAction, useState} from "react";
 
 export function Registration() {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [generalError, setGeneralError] = useState('');
 
-    const handleEmailChange = (event: { target: { value: SetStateAction<string>; }; }) => {
+    const handleEmailChange = (event) => {
         setEmail(event.target.value);
-        setErrorMessage('');
+        setEmailError('');
+        setGeneralError('');
     };
 
-    const handleNameChange = (event: { target: { value: SetStateAction<string>; }; }) => {
+    const handleNameChange = (event) => {
         setName(event.target.value);
-        setErrorMessage('');
+        setGeneralError('');
     };
 
-    const handleUsernameChange = (event: { target: { value: SetStateAction<string>; }; }) => {
+    const handleUsernameChange = (event) => {
         setUsername(event.target.value);
-        setErrorMessage('');
+        setGeneralError('');
     };
 
-    const handlePasswordChange = (event: { target: { value: SetStateAction<string>; }; }) => {
+    const handlePasswordChange = (event) => {
         setPassword(event.target.value);
-        setErrorMessage('');
+        setPasswordError('');
+        setGeneralError('');
+    };
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     };
 
     const handleSubmit = () => {
+        let valid = true;
+
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email');
+            valid = false;
+        }
+
+        if (password.length < 8) {
+            setPasswordError('Password should be at least 8 characters long');
+            valid = false;
+        }
+
+        if (!valid) {
+            return;
+        }
+
         const userData = {
             email: email,
             name: name,
@@ -49,27 +64,51 @@ export function Registration() {
         };
 
         // Send the user data via POST request
-        fetch('http://localhost:4000/v1/auth', {
+        fetch('http://localhost:4000/v2/users/registration', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(userData)
         })
-            .then(response => {
-                if (response.status === 202) {
-                    // Redirect to '/'
-                    window.location.href = '/login';
-                } else if (response.status === 422) {
-                    setErrorMessage('Email is already registered');
+            .then(async response => {
+                console.log('Response status:', response.status);
+                if (response.status === 201) {
+                    // Successful registration
+                    window.location.href = '/login'; // Redirect to login
+                    return response.json();
+                } else if (response.status === 400) {
+                    // Bad request, check the error message
+                    const data = await response.json();
+                    if (data.error && data.error.includes('duplicate key value violates unique constraint "uni_users_email"')) {
+                        setEmailError('Email is already registered');
+                    } else if (data.error && data.error.includes('duplicate key value violates unique constraint "uni_users_username"')) {
+                        setGeneralError('Username is already taken');
+                    } else if (data.error && data.error.includes('Validation error')) {
+                        setEmailError('Use existing email');
+                        setPasswordError('Password should contain more than 8 characters');
+                    } else {
+                        setGeneralError('Unexpected response');
+                    }
                 } else {
-                    throw new Error('Unexpected response');
+                    setGeneralError('Unexpected response');
                 }
             })
             .catch(error => {
                 // Handle errors
                 console.error('Error:', error);
+                setGeneralError('Unexpected error occurred');
             });
+    };
+
+    const handleLoginClick = () => {
+        // Redirect to '/login'
+        window.location.href = '/login';
+    };
+
+    const handleForgotPasswordClick = () => {
+        // Redirect to '/forgot-password'
+        window.location.href = '/forgot-password';
     };
 
     return (
@@ -79,23 +118,51 @@ export function Registration() {
             </Title>
             <Text c="dimmed" size="sm" ta="center" mt={5}>
                 Already have an account?{' '}
-                <Anchor size="sm" component="button">
+                <Anchor size="sm" component="button" onClick={handleLoginClick}>
                     Login
                 </Anchor>
             </Text>
 
             <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-                <TextInput label="Email" placeholder="example@mail.ru" value={email} onChange={handleEmailChange} required />
-                {errorMessage && <Text c="red" size="sm">{errorMessage}</Text>}
-                <TextInput label="Name" placeholder="Bekarys" value={name} onChange={handleNameChange} required />
-                <TextInput label="Username" placeholder="b.karys" value={username} onChange={handleUsernameChange} required />
-                <PasswordInput label="Password" placeholder="Your password" value={password} onChange={handlePasswordChange} required mt="md" />
+                <TextInput
+                    label="Email"
+                    placeholder="example@mail.ru"
+                    value={email}
+                    onChange={handleEmailChange}
+                    required
+                    error={emailError}
+                />
+                <TextInput
+                    label="Name"
+                    placeholder="Bekarys"
+                    value={name}
+                    onChange={handleNameChange}
+                    required
+                />
+                <TextInput
+                    label="Username"
+                    placeholder="b.karys"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    required
+                />
+                <PasswordInput
+                    label="Password"
+                    placeholder="Your password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    required
+                    mt="md"
+                    error={passwordError}
+                />
+                {generalError && <Text c="red" size="sm">{generalError}</Text>}
                 <Group justify="space-between" mt="lg">
-                    <Anchor component="button" size="sm">
+                    <Anchor component="button" size="sm" onClick={handleForgotPasswordClick}>
+                        Forgot password?
                     </Anchor>
                 </Group>
                 <Button fullWidth mt="xl" onClick={handleSubmit}>
-                    Sign in
+                    Sign up
                 </Button>
             </Paper>
         </Container>

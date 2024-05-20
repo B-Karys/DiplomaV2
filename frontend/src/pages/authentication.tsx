@@ -31,16 +31,27 @@ export function Authentication() {
         }
 
         // Send the user data via POST request
-        fetch('http://localhost:4000/v2/tokens/authentication', {
+        fetch('http://localhost:4000/v2/users/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include', // Include cookies in the request
             body: JSON.stringify(userData)
         })
             .then(response => {
                 if (response.ok) {
+                    // Set the authenticated flag in local storage
+                    localStorage.setItem('authenticated', 'true');
+
+                    // Redirect to home page after successful login
+                    window.location.href = '/';
+
+                    // Parse the response JSON
                     return response.json();
+                } else if (response.status === 400) {
+                    setErrorMessage('Invalid email or password');
+                    throw new Error('Invalid email or password');
                 } else if (response.status === 401) {
                     setErrorMessage('The provided password or email are incorrect');
                     throw new Error('Authentication failed');
@@ -48,22 +59,12 @@ export function Authentication() {
                     throw new Error('Unexpected response');
                 }
             })
-            .then(data => {
-                // Extract the token from response
-                const { authentication_token: token } = data;
-
-                // Set the token as a cookie
-                document.cookie = `jwt=${token}; path=/`;
-                
-
-                // Redirect to '/profile'
-                window.location.href = '/profile';
-            })
             .catch(error => {
                 // Handle errors
                 console.error('Error:', error);
             });
     };
+
 
     const handleCreateAccountClick = () => {
         // Redirect to '/register'

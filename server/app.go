@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"net/http"
 
 	"DiplomaV2/config"
 	"DiplomaV2/database"
@@ -44,7 +45,19 @@ func NewEchoServer(conf *config.Config, db database.Database) Server {
 func (s *echoServer) Start() {
 	s.app.Use(middleware.Recover())
 	s.app.Use(middleware.Logger())
-	s.app.Use(middleware.CORS())
+	// CORS middleware with configuration
+	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173"}, // Specify your React frontend domain here
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true, // Allow credentials (cookies)
+
+	}))
+
+	// Handle OPTIONS requests
+	s.app.OPTIONS("/*", func(c echo.Context) error {
+		return c.NoContent(http.StatusNoContent)
+	})
 
 	// Health route
 	s.app.GET("v2/health", func(c echo.Context) error {
@@ -89,25 +102,15 @@ func (s *echoServer) initializeUserHttpHandler() {
 
 	userRouters := s.app.Group("/v2/users")
 	{
-		userRouters.POST("/", userHttpHandler.Registration)
+		userRouters.POST("/registration", userHttpHandler.Registration)
 		userRouters.PUT("/", userHttpHandler.Activation)
+		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, middleware2.LoginMiddleware)
 		userRouters.POST("/login", userHttpHandler.Authentication)
-		//userRouters.GET("/", userHttpHandler.GetUserInfo)
+		userRouters.GET("/check-auth", userHttpHandler.CheckAuth)
+		userRouters.POST("/logout", userHttpHandler.Logout, middleware2.LoginMiddleware)
 		//userRouters.PATCH("/", userHttpHandler.UpdateUserInfo, middleware2.LoginMiddleware)
 		//userRouters.DELETE("/", userHttpHandler.DeleteUser, middleware2.LoginMiddleware)
 		//userRouters.PATCH("/", userHttpHandler.ResetPassword)
 
 	}
 }
-
-//func (s *echoServer) initializeTokenHttpHandler() {
-//	tokenPostgresRepository := tokenRepositories.NewTokenRepository(s.db)
-//	userPostgresRepository := userRepositories.NewUserRepository(s.db)
-//	tokenUseCase := tokenUseCases.NewTokenUseCase(tokenPostgresRepository, userPostgresRepository)
-//	tokenHttpHandler := tokenHandlers.NewTokenHttpHandler(tokenUseCase)
-//
-//	tokenRouters := s.app.Group("/v2/tokens")
-//	{
-//		tokenRouters.POST("/authentication", tokenHttpHandler.CreateAuthenticationToken)
-//	}
-//}

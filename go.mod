@@ -3,6 +3,7 @@ module DiplomaV2
 go 1.21.4
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-mail/mail/v2 v2.3.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.12.0
