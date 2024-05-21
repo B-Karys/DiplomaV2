@@ -14,9 +14,11 @@ import (
 )
 
 var (
-	ErrFailedValidation = errors.New("Validation error")
-	ErrWrongCredentials = errors.New("Wrong Credentials")
-	ErrWrongPassword    = errors.New("Wrong Password")
+	ErrFailedValidation = errors.New("validation error")
+	ErrWrongCredentials = errors.New("wrong Credentials")
+	ErrWrongPassword    = errors.New("wrong Password")
+	ErrNotActive        = errors.New("user is not activated")
+	ErrNotValidPassword = errors.New("password is not valid")
 )
 
 type userHttpHandler struct {
@@ -54,6 +56,10 @@ func (u *userHttpHandler) Authentication(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrWrongPassword.Error())
 	}
 
+	if user.Activated != true {
+		return c.JSON(http.StatusForbidden, ErrNotActive.Error())
+	}
+
 	token, err := u.userUseCase.Authentication(user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, ErrWrongCredentials.Error())
@@ -74,25 +80,18 @@ func (u *userHttpHandler) Authentication(c echo.Context) error {
 	// Set the user in the context
 	c.Set("user", user)
 
-	return c.JSON(http.StatusOK, map[string]interface{}{"message": "Login is successful"})
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "User successfully authenticated"})
 }
 
 func (u *userHttpHandler) CheckAuth(c echo.Context) error {
-	// Authenticate the user using the Authentication handler
-	err := u.Authentication(c)
-	if err != nil {
-		return err
-	}
-
 	// Use LoginMiddleware to extract and validate the JWT token from the cookie
-	err = middleware2.LoginMiddleware(func(c echo.Context) error {
-		// Token is valid
-		println("token is valid")
+	err := middleware2.LoginMiddleware(func(c echo.Context) error {
+		// Token is valid, user is authenticated
 		return c.JSON(http.StatusOK, map[string]string{"authenticated": "true"})
 	})(c)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusUnauthorized, map[string]string{"authenticated": "false"})
 	}
 
 	return nil
@@ -121,27 +120,52 @@ func (u *userHttpHandler) Activation(c echo.Context) error {
 }
 
 func (u *userHttpHandler) ResetPassword(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+	//var input struct {
+	//	TokenPlaintext string `json:"token"`
+	//	NewPassword    string `json:"new_password"`
+	//}
+	//if err := c.Bind(&input); err != nil {
+	//	return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	//}
+	//v := validator.New()
+	//if validator.ValidateTokenPlaintext(v, input.TokenPlaintext); !v.Valid() {
+	//	return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	//}
+	//
+	//if validator.ValidatePasswordPlaintext(v, input.NewPassword); !v.Valid() {
+	//	return c.JSON(http.StatusBadRequest, ErrNotValidPassword)
+	//}
+	//u.userUseCase.ResetPassword()
+	//TODO with the second handler
+	return nil
 }
 
 func (u *userHttpHandler) ChangePassword(c echo.Context) error {
-	/*
-		var input struct {
-			currentPassword string `json:"currentPassword"`
-			newPassword     string `json:"newPassword"`
-			repeatNewPass   string `json:"repeatNewPass"`
+	var input struct {
+		CurrentPassword string `json:"currentPassword"`
+		NewPassword     string `json:"newPassword"`
+		RepeatNewPass   string `json:"repeatNewPass"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	}
+
+	if input.NewPassword != input.RepeatNewPass {
+		return c.JSON(http.StatusBadRequest, "New passwords do not match")
+	}
+
+	userId := c.Get("userID").(int64)
+
+	err := u.userUseCase.ChangePassword(userId, input.CurrentPassword, input.NewPassword)
+	if err != nil {
+		if errors.Is(err, ErrWrongPassword) {
+			return c.JSON(http.StatusBadRequest, "Current password is incorrect")
 		}
-		if err := c.Bind(&input); err != nil {
-			return c.JSON(http.StatusBadRequest, ErrFailedValidation)
-		}
-		v := validator.New()
-		if validator.ValidateTokenPlaintext(v, input.currentPassword); !v.Valid() {
-			return c.JSON(http.StatusBadRequest, ErrFailedValidation)
-		}
-		//TODO implement me with middleware
-	*/
-	return nil
+		return c.JSON(http.StatusInternalServerError, "Failed to update password")
+	}
+
+	return c.JSON(http.StatusOK, "Password updated successfully")
 }
 
 func (u *userHttpHandler) Registration(c echo.Context) error {
@@ -260,6 +284,21 @@ func (u *userHttpHandler) DeleteUser(c echo.Context) error {
 }
 
 func (u *userHttpHandler) Logout(c echo.Context) error {
+	/* //TODO: once the refresh tokens are done
+	token := c.Get("context_token").(string)
+	println("context token is:", token)
+
+	userID, ok := c.Get("userID").(int64)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid user ID"})
+	}
+
+	err := u.userUseCase.DeleteToken(userID, token)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	*/
+
 	// Clear the authentication cookie
 	c.SetCookie(&http.Cookie{
 		Name:     "jwt",
@@ -267,7 +306,7 @@ func (u *userHttpHandler) Logout(c echo.Context) error {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
-		Secure:   true, // Recommended to use only with HTTPS
+		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	})
 

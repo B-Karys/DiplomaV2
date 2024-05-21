@@ -55,6 +55,15 @@ export function Authentication() {
                 } else if (response.status === 401) {
                     setErrorMessage('The provided password or email are incorrect');
                     throw new Error('Authentication failed');
+                } else if (response.status === 403) {
+                    return response.json().then(data => {
+                        if (data.message === 'User is not activated') {
+                            setErrorMessage('User is not activated');
+                        } else {
+                            setErrorMessage('User is not activated, please check you mailbox');
+                        }
+                        throw new Error('User is not activated');
+                    });
                 } else {
                     throw new Error('Unexpected response');
                 }

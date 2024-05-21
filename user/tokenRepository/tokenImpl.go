@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -19,7 +20,7 @@ type tokenRepository struct {
 	DB database.Database
 }
 
-func (t tokenRepository) New(userID int64, ttl time.Duration, scope string) (*models.Token, error) {
+func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*models.Token, error) {
 	token, err := generateToken(userID, ttl, scope)
 	if err != nil {
 		return nil, err
@@ -28,17 +29,37 @@ func (t tokenRepository) New(userID int64, ttl time.Duration, scope string) (*mo
 	return token, err
 }
 
-func (t tokenRepository) insert(token *models.Token) error {
+func (t *tokenRepository) insert(token *models.Token) error {
 	if err := t.DB.GetDb().Create(token).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (t tokenRepository) DeleteAllForUser(scope string, userID int64) error {
+func (t *tokenRepository) DeleteAllForUser(scope string, userID int64) error {
 	if err := t.DB.GetDb().Where("scope = ? AND user_id = ?", scope, userID).Delete(&models.Token{}).Error; err != nil {
 		return err
 	}
+	return nil
+}
+func (t *tokenRepository) DeleteToken(userID int64, tokenString string) error {
+	var token models.Token
+
+	// Find the token for the user
+	if err := t.DB.GetDb().Where("user_id = ?", userID).First(&token).Error; err != nil {
+		return err
+	}
+
+	// Compare the token string with the stored plaintext token
+	if tokenString != token.Plaintext {
+		return errors.New("token does not match the provided user")
+	}
+
+	// Delete the token
+	if err := t.DB.GetDb().Delete(&token).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 

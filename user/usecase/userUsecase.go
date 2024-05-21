@@ -11,7 +11,8 @@ type UserUseCase interface {
 	GetUserById(id int64) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
 	UpdateUser(user *models.User) error
-	ChangePassword(user *models.User) error
+	ChangePassword(userID int64, currentPassword, newPassword string) error
 	ResetPassword(email string) error
+	DeleteToken(userID int64, tokenString string) error
 	DeleteUser(id int64) error
 }

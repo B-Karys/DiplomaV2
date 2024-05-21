@@ -104,9 +104,10 @@ func (s *echoServer) initializeUserHttpHandler() {
 	{
 		userRouters.POST("/registration", userHttpHandler.Registration)
 		userRouters.PUT("/", userHttpHandler.Activation)
-		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, middleware2.LoginMiddleware)
 		userRouters.POST("/login", userHttpHandler.Authentication)
 		userRouters.GET("/check-auth", userHttpHandler.CheckAuth)
+		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, middleware2.LoginMiddleware)
+		userRouters.PATCH("/password", userHttpHandler.ChangePassword, middleware2.LoginMiddleware)
 		userRouters.POST("/logout", userHttpHandler.Logout, middleware2.LoginMiddleware)
 		//userRouters.PATCH("/", userHttpHandler.UpdateUserInfo, middleware2.LoginMiddleware)
 		//userRouters.DELETE("/", userHttpHandler.DeleteUser, middleware2.LoginMiddleware)

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Group, Button } from '@mantine/core';
 import '@mantine/core/styles.css';
 import classes from './authentication.module.css';
@@ -72,14 +72,13 @@ export function Registration() {
             body: JSON.stringify(userData)
         })
             .then(async response => {
-                console.log('Response status:', response.status);
                 if (response.status === 201) {
                     // Successful registration
                     window.location.href = '/login'; // Redirect to login
-                    return response.json();
-                } else if (response.status === 400) {
-                    // Bad request, check the error message
-                    const data = await response.json();
+                    return;
+                }
+                const data = await response.json();
+                if (response.status === 400) {
                     if (data.error && data.error.includes('duplicate key value violates unique constraint "uni_users_email"')) {
                         setEmailError('Email is already registered');
                     } else if (data.error && data.error.includes('duplicate key value violates unique constraint "uni_users_username"')) {

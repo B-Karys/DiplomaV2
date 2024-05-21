@@ -5,7 +5,6 @@ import (
 	"DiplomaV2/post/usecase"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
 type postHttpHandler struct {
@@ -15,7 +14,7 @@ type postHttpHandler struct {
 // HTTP handler
 func (p postHttpHandler) CreatePost(c echo.Context) error {
 	//Extract user ID from JWT token or any other authentication mechanism
-	userIDInterface := c.Get("userID")
+	userID := c.Get("userID").(int64)
 
 	// Parse request body
 	var input struct { //future: grpc message
@@ -27,27 +26,19 @@ func (p postHttpHandler) CreatePost(c echo.Context) error {
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-	userID, ok := userIDInterface.(string)
-	if !ok {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid userID type"})
-	}
 
 	// Convert the string to int64
-	userIDInt, err := strconv.ParseInt(userID, 10, 64)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid userID value"})
-	}
 
 	//Create a new Post object
 	post := &models.Post{
 		Name:        input.Name,
 		Description: input.Description,
 		Type:        input.Type,
-		AuthorID:    userIDInt,
+		AuthorID:    userID,
 	}
 
 	// Call the use case to create a new post
-	err = p.postUsecase.CreatePost(post)
+	err := p.postUsecase.CreatePost(post)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
 	}

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"DiplomaV2/internal/validator"
 	"DiplomaV2/user/models"
 	"DiplomaV2/user/repository"
 	"DiplomaV2/user/tokenRepository"
@@ -17,6 +18,7 @@ type userUseCaseImpl struct {
 
 var (
 	TokenCreationFailed = errors.New("Token creation failed")
+	ErrWrongPassword    = errors.New("Wrong password")
 )
 
 func (u *userUseCaseImpl) Activation(tokenPlaintext string) error {
@@ -37,9 +39,37 @@ func (u *userUseCaseImpl) Activation(tokenPlaintext string) error {
 	return err
 }
 
-func (u *userUseCaseImpl) ChangePassword(user *models.User) error {
-	//TODO implement me
-	panic("implement me")
+func (u *userUseCaseImpl) ChangePassword(userId int64, currentPassword string, newPassword string) error {
+	user, err := u.repo.GetByID(userId)
+	if err != nil {
+		return err
+	}
+
+	match, err := user.Password.Matches(currentPassword)
+	if err != nil {
+		return err
+	}
+
+	if !match {
+		return ErrWrongPassword
+	}
+
+	v := validator.New()
+	validator.ValidatePasswordPlaintext(v, newPassword)
+	if !v.Valid() {
+		return errors.New("password should contain more than 8 characters")
+	}
+
+	err = user.Password.Set(newPassword)
+	if err != nil {
+		return err
+	}
+	err = u.repo.Update(user)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (u *userUseCaseImpl) ResetPassword(email string) error {
@@ -48,13 +78,11 @@ func (u *userUseCaseImpl) ResetPassword(email string) error {
 }
 
 func (u *userUseCaseImpl) Authentication(user *models.User) (string, error) {
-
 	token, err := u.createAuthenticationToken(user)
 	if err != nil {
 		return TokenCreationFailed.Error(), err
 	}
 	return token, nil
-
 }
 
 func (u *userUseCaseImpl) Registration(user *models.User) (*models.Token, error) {
@@ -86,6 +114,10 @@ func (u *userUseCaseImpl) GetUserById(id int64) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (u *userUseCaseImpl) DeleteToken(userID int64, tokenString string) error {
+	return u.tokenRepo.DeleteToken(userID, tokenString)
 }
 
 func (u *userUseCaseImpl) GetUserByEmail(email string) (*models.User, error) {
@@ -124,10 +156,10 @@ func (u *userUseCaseImpl) createAuthenticationToken(user *models.User) (string, 
 	}
 
 	// Optionally create a record in the token tokenRepository
-	_, err = u.tokenRepo.New(user.ID, 1*time.Hour, tokenRepository.ScopeAuthentication)
-	if err != nil {
-		return "Error while Inserting token to DB", err
-	}
+	//_, err = u.tokenRepo.New(user.ID, 1*time.Hour, tokenRepository.ScopeAuthentication)
+	//if err != nil {
+	//	return "Error while Inserting token to DB", err
+	//}
 
 	return jwtToken, nil
 }
