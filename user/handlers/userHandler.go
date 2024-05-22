@@ -12,6 +12,7 @@ type UserHandler interface {
 	UpdateUserInfo(c echo.Context) error
 	ChangePassword(c echo.Context) error
 	ResetPassword(c echo.Context) error
+	ForgotPassword(c echo.Context) error
 	Logout(c echo.Context) error
 	DeleteUser(c echo.Context) error
 }

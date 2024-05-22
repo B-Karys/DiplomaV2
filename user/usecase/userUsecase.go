@@ -10,9 +10,9 @@ type UserUseCase interface {
 	Authentication(user *models.User) (string, error)
 	GetUserById(id int64) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
-	UpdateUser(user *models.User) error
+	UpdateUserInfo(int64, string, string, string, []string) error
 	ChangePassword(userID int64, currentPassword, newPassword string) error
-	ResetPassword(email string) error
-	DeleteToken(userID int64, tokenString string) error
+	ForgotPassword(email string) (string, error)
+	ResetPassword(string, string) error
 	DeleteUser(id int64) error
 }

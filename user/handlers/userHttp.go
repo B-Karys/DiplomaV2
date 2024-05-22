@@ -18,7 +18,6 @@ var (
 	ErrWrongCredentials = errors.New("wrong Credentials")
 	ErrWrongPassword    = errors.New("wrong Password")
 	ErrNotActive        = errors.New("user is not activated")
-	ErrNotValidPassword = errors.New("password is not valid")
 )
 
 type userHttpHandler struct {
@@ -119,25 +118,51 @@ func (u *userHttpHandler) Activation(c echo.Context) error {
 	return c.JSON(http.StatusAccepted, map[string]interface{}{"message": "Activation successful"})
 }
 
+func (u *userHttpHandler) ForgotPassword(c echo.Context) error {
+	var input struct {
+		Email string `json:"email"`
+	}
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	// Call the use case to generate the token
+	token, err := u.userUseCase.ForgotPassword(input.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	// Send the password reset email in the background
+	u.background(func() error {
+		data := map[string]any{
+			"passwordResetToken": token,
+		}
+		return u.mailer.Send(input.Email, "token_password_reset.tmpl", data)
+	})
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Password reset email sent"})
+}
+
 func (u *userHttpHandler) ResetPassword(c echo.Context) error {
-	//var input struct {
-	//	TokenPlaintext string `json:"token"`
-	//	NewPassword    string `json:"new_password"`
-	//}
-	//if err := c.Bind(&input); err != nil {
-	//	return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
-	//}
-	//v := validator.New()
-	//if validator.ValidateTokenPlaintext(v, input.TokenPlaintext); !v.Valid() {
-	//	return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
-	//}
-	//
-	//if validator.ValidatePasswordPlaintext(v, input.NewPassword); !v.Valid() {
-	//	return c.JSON(http.StatusBadRequest, ErrNotValidPassword)
-	//}
-	//u.userUseCase.ResetPassword()
-	//TODO with the second handler
-	return nil
+	var input struct {
+		Token       string `json:"token"`
+		NewPassword string `json:"newPassword"`
+	}
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	v := validator.New()
+	if validator.ValidateTokenPlaintext(v, input.Token); !v.Valid() {
+		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	}
+
+	err := u.userUseCase.ResetPassword(input.Token, input.NewPassword)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Password reset successful"})
 }
 
 func (u *userHttpHandler) ChangePassword(c echo.Context) error {
@@ -215,21 +240,6 @@ func (u *userHttpHandler) Registration(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]interface{}{"user": user})
 }
 
-func (u *userHttpHandler) background(fn func() error) {
-	// Launch a background goroutine.
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				return
-			}
-		}()
-		err := fn()
-		if err != nil {
-			return
-		}
-	}()
-}
-
 func (u *userHttpHandler) GetUserInfoByEmail(c echo.Context) error {
 	var input struct {
 		Email string `json:"email"`
@@ -274,13 +284,47 @@ func (u *userHttpHandler) GetUserInfoById(c echo.Context) error {
 }
 
 func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+	var input struct {
+		Surname  string   `json:"surname"`
+		Telegram string   `json:"telegram"`
+		Discord  string   `json:"discord"`
+		Skills   []string `json:"skills"`
+	}
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	// Get the user ID from the context
+	userID := c.Get("userID").(int64)
+
+	// Call the use case to update the user
+	err := u.userUseCase.UpdateUserInfo(userID, input.Surname, input.Telegram, input.Discord, input.Skills)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusAccepted, map[string]string{"message": "User updated successfully"})
 }
 
 func (u *userHttpHandler) DeleteUser(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+	// Get the user ID from the URL
+	userID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+	}
+
+	contextUser := c.Get("userID").(int64)
+	if contextUser != userID {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Current user is not the user in the parameter"})
+	}
+
+	// Call the repository method to delete the user
+	err = u.userUseCase.DeleteUser(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete user"})
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (u *userHttpHandler) Logout(c echo.Context) error {
@@ -311,6 +355,21 @@ func (u *userHttpHandler) Logout(c echo.Context) error {
 	})
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": "Logout successful"})
+}
+
+func (u *userHttpHandler) background(fn func() error) {
+	// Launch a background goroutine.
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				return
+			}
+		}()
+		err := fn()
+		if err != nil {
+			return
+		}
+	}()
 }
 
 func NewUserHttpHandler(userUsecase usecase.UserUseCase, theMailer mailer.Mailer) UserHandler {

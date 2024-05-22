@@ -18,11 +18,10 @@ func NewUserRepository(db database.Database) UserRepository {
 }
 
 var (
-	ErrDuplicateEmail   = errors.New("duplicate email")
-	ErrFailedValidation = errors.New("failed validation")
+	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
-func (m userRepository) Insert(user *models.User) error {
+func (m *userRepository) Insert(user *models.User) error {
 	result := m.DB.GetDb().Create(user).Scan(user)
 	if result.Error != nil {
 		switch {
@@ -35,7 +34,7 @@ func (m userRepository) Insert(user *models.User) error {
 	return nil
 }
 
-func (m userRepository) GetByID(id int64) (*models.User, error) {
+func (m *userRepository) GetByID(id int64) (*models.User, error) {
 	// Initialize a User variable to store the result
 	var user models.User
 
@@ -55,7 +54,7 @@ func (m userRepository) GetByID(id int64) (*models.User, error) {
 	return &user, nil
 }
 
-func (m userRepository) GetByEmail(email string) (*models.User, error) {
+func (m *userRepository) GetByEmail(email string) (*models.User, error) {
 	// Initialize a User variable to store the result
 	var user models.User
 
@@ -74,18 +73,17 @@ func (m userRepository) GetByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (m userRepository) Update(user *models.User) error {
+func (m *userRepository) Update(user *models.User) error {
 	// Use GORM's Updates method to update the user
 	result := m.DB.GetDb().Save(user)
 	// Check for errors
 	if result.Error != nil {
 		return result.Error
 	}
-
 	return nil
 }
 
-func (m userRepository) GetForToken(tokenScope, tokenPlaintext string) (*models.User, error) {
+func (m *userRepository) GetForToken(tokenScope, tokenPlaintext string) (*models.User, error) {
 	// Calculate the SHA-256 hash of the plaintext token provided by the client.
 	// Remember that this returns a byte *array* with length 32, not a slice.
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
@@ -111,7 +109,7 @@ func (m userRepository) GetForToken(tokenScope, tokenPlaintext string) (*models.
 	return &user, nil
 }
 
-func (m userRepository) Delete(id int64) error {
+func (m *userRepository) Delete(id int64) error {
 	// Construct the model instance with the ID set
 	user := models.User{ID: id}
 
