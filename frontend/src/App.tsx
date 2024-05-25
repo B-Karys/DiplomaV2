@@ -8,6 +8,8 @@ import  { ProfilePage } from './pages/profilepage.tsx'; // Import ProfilePage co
 import { AuthProvider, useAuth } from './context/authContext.tsx';
 import { Navbar } from "./components/navbar.tsx";
 import "./components/navbar.module.css"
+import {MyPosts} from "./pages/myPosts.tsx";
+import ManagePost from "./pages/manage-post.tsx";
 
 export default function App() {
     return (
@@ -20,6 +22,8 @@ export default function App() {
                         <Route path="/login" element={<AuthenticationRoute />} />
                         <Route path="/register" element={<Registration />} />
                         <Route path="/profile" element={<ProfileRoute />} />
+                        <Route path="/posts" element={<MyPostsRoute />} />
+                        <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
                     </Routes>
                 </Router>
             </AuthProvider>
@@ -41,3 +45,11 @@ const ProfileRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />;
 };
+
+const MyPostsRoute = () => {
+    return <MyPosts />;
+}
+
+const ManagePostsRoute = () => {
+    return <ManagePost />;
+}

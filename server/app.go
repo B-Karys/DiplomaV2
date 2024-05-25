@@ -48,7 +48,7 @@ func (s *echoServer) Start() {
 	// CORS middleware with configuration
 	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:5173"}, // Specify your React frontend domain here
-		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true, // Allow credentials (cookies)
 
@@ -116,6 +116,7 @@ func (s *echoServer) initializePostHttpHandler() {
 	postRouters.POST("/", postHttpHandler.CreatePost, middleware2.LoginMiddleware)
 	postRouters.GET("/:id", postHttpHandler.GetPostById)
 	postRouters.GET("/", postHttpHandler.GetFilteredPosts)
+	postRouters.GET("/my", postHttpHandler.GetMyPosts, middleware2.LoginMiddleware)
 	postRouters.PATCH("/:id", postHttpHandler.UpdatePost, middleware2.LoginMiddleware)
 	postRouters.DELETE("/:id", postHttpHandler.DeletePost, middleware2.LoginMiddleware)
 

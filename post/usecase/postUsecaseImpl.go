@@ -67,7 +67,7 @@ func (p *postUseCaseImpl) DeletePost(id int64) error {
 	return nil
 }
 
-func (p *postUseCaseImpl) UpdatePost(postID, userID int64, name string, description string, postType string) error {
+func (p *postUseCaseImpl) UpdatePost(postID, userID int64, name string, description string, skills []string, postType string) error {
 	post, err := p.Repo.GetByID(postID)
 	if err != nil {
 		return err
@@ -80,6 +80,7 @@ func (p *postUseCaseImpl) UpdatePost(postID, userID int64, name string, descript
 	post.Name = name
 	post.Description = description
 	post.Type = postType
+	post.Skills = skills
 
 	err = p.Repo.Update(post)
 	if err != nil {

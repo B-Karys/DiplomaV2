@@ -22,16 +22,18 @@ export function Navbar() {
     }, []);
 
     return (
-        <Box pb={120}>
+        <Box pb={60}> {/* Adjusted padding-bottom */}
             <header className={classes.header}>
                 <Group justify="space-between" h="100%">
                     <Group h="100%" gap={0} visibleFrom="sm">
                         <Link to="/" className={classes.link}>
                             Home
                         </Link>
-                        <Link to="/posts" className={classes.link}>
-                            My Posts
-                        </Link>
+                        {authenticated && (
+                            <Link to="/posts" className={classes.link}>
+                                My Posts
+                            </Link>
+                        )}
                     </Group>
                     <Group visibleFrom="sm">
                         {!authenticated ? (
@@ -57,7 +59,7 @@ export function Navbar() {
                                         Menu <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
                                     </UnstyledButton>
                                 </Menu.Target>
-                                <Menu.Dropdown opened={menuOpened} onClose={() => setMenuOpened(false)}>
+                                <Menu.Dropdown opened={menuOpened} onClose={() => setMenuOpened(false)} className={classes.menuDropdown}>
                                     {/* Liked Posts */}
                                     <Menu.Item color={"red"}
                                                leftSection={
@@ -157,8 +159,8 @@ export function Navbar() {
                     <Collapse in={menuOpened}>
                         {authenticated && (
                             <>
-                                <a href="#" className={classes.link}>My Posts</a>
-                                <a href="#" className={classes.link}>My Profile</a>
+                                <Link to="/posts" className={classes.link}>My Posts</Link>
+                                <Link to="/profile" className={classes.link}>My Profile</Link>
                             </>
                         )}
                     </Collapse>
@@ -166,8 +168,8 @@ export function Navbar() {
                     <Group justify="center" grow pb="xl" px="md">
                         {!authenticated && (
                             <>
-                                <Link to="/login" ><Button variant="default">Log in</Button></Link>
-                                <Link to="/register" ><Button>Sign up</Button></Link>
+                                <Link to="/login"><Button variant="default">Log in</Button></Link>
+                                <Link to="/register"><Button>Sign up</Button></Link>
                             </>
                         )}
                     </Group>
@@ -176,4 +178,3 @@ export function Navbar() {
         </Box>
     );
 }
-

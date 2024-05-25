@@ -4,8 +4,10 @@ import (
 	"DiplomaV2/post/models"
 	"DiplomaV2/post/usecase"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type postHttpHandler struct {
@@ -15,6 +17,35 @@ type postHttpHandler struct {
 func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 	// Parse query parameters to extract filters
 	authorID := c.QueryParam("author_id")
+	postType := c.QueryParam("type")
+
+	// Convert postType to lowercase for searching
+	postType = strings.ToLower(postType)
+
+	// Call the appropriate use case method based on the presence of filters
+	if authorID != "" || postType != "" {
+		// If filters are provided, call the GetFilteredPosts method
+		posts, err := p.postUseCase.GetFilteredPosts(authorID, postType)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		return c.JSON(http.StatusOK, posts)
+	} else {
+		// If no filters are provided, call the GetAllPosts method
+		posts, err := p.postUseCase.GetAllPosts()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		return c.JSON(http.StatusOK, posts)
+	}
+}
+
+func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
+	userID := c.Get("userID").(int64)
+	// Parse query parameters to extract filters
+	authorID := strconv.FormatInt(userID, 10)
+	println("My User ID is: ", authorID)
+
 	postType := c.QueryParam("type")
 
 	// Call the appropriate use case method based on the presence of filters
@@ -86,19 +117,19 @@ func (p *postHttpHandler) GetPostByAuthor(c echo.Context) error {
 }
 */
 
-func (p *postHttpHandler) GetAllPosts(c echo.Context) error {
-	// Extract filter criteria from query parameters
-	authorID := c.QueryParam("author_id")
-	postType := c.QueryParam("type")
-	// Assuming more filters like skills, etc.
-
-	// Call the use case method passing the filter criteria
-	posts, err := p.postUseCase.GetFilteredPosts(authorID, postType /*, additional filter criteria*/)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-	}
-	return c.JSON(http.StatusOK, posts)
-}
+//func (p *postHttpHandler) GetAllPosts(c echo.Context) error {
+//	// Extract filter criteria from query parameters
+//	authorID := c.QueryParam("author_id")
+//	postType := c.QueryParam("type")
+//	// Assuming more filters like skills, etc.
+//
+//	// Call the use case method passing the filter criteria
+//	posts, err := p.postUseCase.GetFilteredPosts(authorID, postType /*, additional filter criteria*/)
+//	if err != nil {
+//		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+//	}
+//	return c.JSON(http.StatusOK, posts)
+//}
 
 /*
 func (p *postHttpHandler) GetPostByType(c echo.Context) error {
@@ -128,7 +159,7 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	post := &models.Post{
 		Name:        input.Name,
 		Description: input.Description,
-		Type:        input.Type,
+		Type:        strings.ToLower(input.Type),
 		Skills:      input.Skills,
 		AuthorID:    userID,
 	}
@@ -143,9 +174,10 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 
 func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 	var input struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Type        string `json:"type"`
+		Name        string         `json:"name"`
+		Description string         `json:"description"`
+		Type        string         `json:"type"`
+		Skills      pq.StringArray `json:"skills"`
 	}
 
 	if err := c.Bind(&input); err != nil {
@@ -157,7 +189,7 @@ func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 
 	authorID := c.Get("userID").(int64)
 
-	err = p.postUseCase.UpdatePost(postID, authorID, input.Name, input.Description, input.Type)
+	err = p.postUseCase.UpdatePost(postID, authorID, input.Name, input.Description, input.Skills, strings.ToLower(input.Type))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

@@ -2,36 +2,29 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import '@mantine/core/styles.css';
 import './home.css'; // Import the CSS file
-import Filter from '../components/filter.tsx';
+import { Link } from 'react-router-dom'; // Import Link for routing
 
 interface Post {
     id: number;
     createdAt: string;
     name: string;
     description: string;
-    authorId: number;
     type: string;
     skills: string[];
 }
 
-export function Home() {
+export function MyPosts() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [type, setType] = useState<string>('');
-    const [skills, setSkills] = useState<string[]>([]);
 
-    const fetchPosts = async (type: string, skills: string[]) => {
+    const fetchPosts = async () => {
         setLoading(true);
         setError(null);
         try {
-            let url = 'http://localhost:4000/v2/posts/';
-            const params = new URLSearchParams();
-            if (type) params.append('type', type);
-            if (skills.length) params.append('skills', skills.join(','));
-            url += `?${params.toString()}`;
-
-            const response = await axios.get<Post[]>(url);
+            const response = await axios.get<Post[]>('http://localhost:4000/v2/posts/my', {
+                withCredentials: true  // Include cookies in the request
+            });
             setPosts(response.data);
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -45,32 +38,30 @@ export function Home() {
     };
 
     useEffect(() => {
-        fetchPosts(type, skills);
-    }, [type, skills]);
-
-    const handleFilterChange = (selectedType: string, selectedSkills: string[]) => {
-        setType(selectedType);
-        setSkills(selectedSkills);
-    };
+        fetchPosts();
+    }, []);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error loading posts: {error}</div>;
 
     return (
         <div className="container">
-            <div className="filter-container">
-                <Filter initialType={type} initialSkills={skills} onFilterChange={handleFilterChange} />
-            </div>
+            {/*<div className="filter-container">*/}
+            {/*    <Filter />*/}
+            {/*</div>*/}
             <div className="posts-container">
+                <h1>This is My Posts page</h1>
                 <div>
                     {posts.map(post => (
                         <div key={post.id} className="post">
                             <h2>{post.name}</h2>
                             <p>{post.description}</p>
-                            <p>Author ID: {post.authorId}</p>
                             <p>Type: {post.type}</p>
                             <p>Skills: {post.skills.join(', ')}</p>
                             <p>Created At: {new Date(post.createdAt).toLocaleString()}</p>
+                            <Link to={`/manage-post/${post.id}`}>
+                                <button>Manage Post</button>
+                            </Link>
                         </div>
                     ))}
                 </div>

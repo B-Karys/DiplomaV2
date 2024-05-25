@@ -1,0 +1,21 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.filter-container {
+    width: 25%;
+    padding-right: 10px;
+}
+
+.posts-container {
+    width: 70%;
+    padding-right: 100px;
+}
+
+.post {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}

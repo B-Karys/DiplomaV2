@@ -6,7 +6,8 @@ type PostHandler interface {
 	CreatePost(c echo.Context) error
 	GetPostById(c echo.Context) error
 	GetFilteredPosts(c echo.Context) error // Changed method name
-	GetAllPosts(c echo.Context) error
+	GetMyPosts(c echo.Context) error
+	//GetAllPosts(c echo.Context) error
 	UpdatePost(c echo.Context) error
 	DeletePost(c echo.Context) error
 }

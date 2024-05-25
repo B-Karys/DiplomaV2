@@ -1,11 +1,15 @@
-/* navbar.module.css */
-
 /* Header */
 .header {
     height: rem(60px);
     padding-left: var(--mantine-spacing-md);
     padding-right: var(--mantine-spacing-md);
     border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    position: fixed; /* Make the navbar fixed at the top */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure the navbar is above other content */
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-9)); /* Ensure background is solid */
 }
 
 /* Links */
@@ -19,14 +23,16 @@
     color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
     font-weight: 500;
     font-size: var(--mantine-font-size-sm);
+}
 
-    @media (max-width: $mantine-breakpoint-sm) {
+.link:hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
+
+@media (max-width: $mantine-breakpoint-sm) {
+    .link {
         height: rem(42px);
         width: 100%;
-    }
-
-    @mixin hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
     }
 }
 
@@ -36,13 +42,13 @@
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
     border-radius: var(--mantine-radius-md);
     text-decoration: none;
-
-
-    @mixin hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
-    }
 }
 
+.subLink:hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+}
+
+/* Dropdown Links */
 .dropdown-link {
     display: flex;
     align-items: center;
@@ -53,29 +59,34 @@
     color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
     font-weight: 500;
     font-size: var(--mantine-font-size-sm);
+}
 
+.dropdown-link:hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
 
-    @media (max-width: $mantine-breakpoint-sm) {
+@media (max-width: $mantine-breakpoint-sm) {
+    .dropdown-link {
         height: rem(42px);
         width: 100%;
     }
 }
 
-/* Sublinks */
+/* Dropdown Sublinks */
 .dropdown-subLink {
     width: 100%;
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
     border-radius: var(--mantine-radius-md);
-    text-decoration: none; /* Removed text decoration */
+    text-decoration: none;
     color: inherit; /* Inherit color from parent */
 }
 
-
+.dropdown-subLink:hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+}
 
 /* Drawer */
 .drawer {
-    /* Add your styling for the Drawer component here */
-    /* Example styles: */
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-9));
     border: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
     border-radius: var(--mantine-radius-md);
@@ -92,12 +103,14 @@
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
     border-radius: var(--mantine-radius-sm);
     transition: background-color 100ms ease;
+}
 
-    &:hover {
-        background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
-    }
+.user:hover {
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+}
 
-    @media (max-width: $mantine-breakpoint-xs) {
+@media (max-width: $mantine-breakpoint-xs) {
+    .user {
         display: none;
     }
 }
@@ -118,22 +131,22 @@
     background-color: transparent;
     position: relative;
     bottom: -1px;
+}
 
-    &::before,
-    &::after {
-        background-color: light-dark(
-                var(--mantine-color-gray-2),
-                var(--mantine-color-dark-7)
-        ) !important;
-    }
+.tab::before,
+.tab::after {
+    background-color: light-dark(
+            var(--mantine-color-gray-2),
+            var(--mantine-color-dark-7)
+    ) !important;
+}
 
-    &:hover {
-        background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
-    }
+.tab:hover {
+    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+}
 
-    &[data-active] {
-        background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-        border-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-7));
-        border-bottom-color: transparent;
-    }
+.tab[data-active] {
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+    border-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-7));
+    border-bottom-color: transparent;
 }

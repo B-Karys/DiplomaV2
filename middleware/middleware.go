@@ -16,7 +16,7 @@ func LoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie, err := c.Cookie("jwt")
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Missing or invalid cookie"})
+			return c.JSON(http.StatusUnauthorized, map[string]string{"Error": err.Error()})
 		}
 		tokenString := cookie.Value
 
