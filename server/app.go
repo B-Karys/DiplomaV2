@@ -85,16 +85,6 @@ func (s *echoServer) initializeMigrations() {
 	}
 }
 
-func (s *echoServer) initializePostHttpHandler() {
-	postPostgresRepository := postRepositories.NewPostRepository(s.db)
-	postUseCase := postUseCases.NewPostUseCase(postPostgresRepository)
-	postHttpHandler := postHandlers.NewPostHttpHandler(postUseCase)
-
-	postRouters := s.app.Group("/v2/posts")
-	postRouters.POST("/", postHttpHandler.CreatePost, middleware2.LoginMiddleware)
-	postRouters.PATCH("/:id", postHttpHandler.UpdatePost, middleware2.LoginMiddleware)
-}
-
 func (s *echoServer) initializeUserHttpHandler() {
 	userPostgresRepository := userRepositories.NewUserRepository(s.db)
 	tokenPostgresRepository := tokenRepositories.NewTokenRepository(s.db)
@@ -115,4 +105,18 @@ func (s *echoServer) initializeUserHttpHandler() {
 		userRouters.POST("/forgot-password", userHttpHandler.ForgotPassword)
 		userRouters.POST("/reset-password", userHttpHandler.ResetPassword)
 	}
+}
+
+func (s *echoServer) initializePostHttpHandler() {
+	postPostgresRepository := postRepositories.NewPostRepository(s.db)
+	postUseCase := postUseCases.NewPostUseCase(postPostgresRepository)
+	postHttpHandler := postHandlers.NewPostHttpHandler(postUseCase)
+
+	postRouters := s.app.Group("/v2/posts")
+	postRouters.POST("/", postHttpHandler.CreatePost, middleware2.LoginMiddleware)
+	postRouters.GET("/:id", postHttpHandler.GetPostById)
+	postRouters.GET("/", postHttpHandler.GetFilteredPosts)
+	postRouters.PATCH("/:id", postHttpHandler.UpdatePost, middleware2.LoginMiddleware)
+	postRouters.DELETE("/:id", postHttpHandler.DeletePost, middleware2.LoginMiddleware)
+
 }

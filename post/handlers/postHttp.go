@@ -9,8 +9,107 @@ import (
 )
 
 type postHttpHandler struct {
-	postUsecase usecase.PostUseCase
+	postUseCase usecase.PostUseCase
 }
+
+func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
+	// Parse query parameters to extract filters
+	authorID := c.QueryParam("author_id")
+	postType := c.QueryParam("type")
+
+	// Call the appropriate use case method based on the presence of filters
+	if authorID != "" || postType != "" {
+		// If filters are provided, call the GetFilteredPosts method
+		posts, err := p.postUseCase.GetFilteredPosts(authorID, postType)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		return c.JSON(http.StatusOK, posts)
+	} else {
+		// If no filters are provided, call the GetAllPosts method
+		posts, err := p.postUseCase.GetAllPosts()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		return c.JSON(http.StatusOK, posts)
+	}
+}
+
+func (p *postHttpHandler) DeletePost(c echo.Context) error {
+	userID := c.Get("userID")
+	postID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid post id"})
+	}
+
+	post, err := p.postUseCase.GetPostById(postID)
+	if post == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": "Post not found"})
+	}
+
+	if post.AuthorID != userID || err != nil {
+		return c.JSON(http.StatusConflict, map[string]string{"message": "Post doesn't belong to you"})
+	}
+	err = p.postUseCase.DeletePost(post.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (p *postHttpHandler) GetPostById(c echo.Context) error {
+	postID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid post id"})
+	}
+	post, err := p.postUseCase.GetPostById(postID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, post)
+}
+
+/*
+func (p *postHttpHandler) GetPostByAuthor(c echo.Context) error {
+	var input struct {
+		AuthorID int64 `json:"author_id"`
+	}
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	posts, err := p.postUseCase.GetPostByAuthor(input.AuthorID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, posts)
+}
+*/
+
+func (p *postHttpHandler) GetAllPosts(c echo.Context) error {
+	// Extract filter criteria from query parameters
+	authorID := c.QueryParam("author_id")
+	postType := c.QueryParam("type")
+	// Assuming more filters like skills, etc.
+
+	// Call the use case method passing the filter criteria
+	posts, err := p.postUseCase.GetFilteredPosts(authorID, postType /*, additional filter criteria*/)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, posts)
+}
+
+/*
+func (p *postHttpHandler) GetPostByType(c echo.Context) error {
+
+	posts, err := p.postUseCase.GetPostByType(c.QueryParam("type"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, posts)
+}
+*/
 
 func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	userID := c.Get("userID").(int64)
@@ -34,7 +133,7 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 		AuthorID:    userID,
 	}
 
-	err := p.postUsecase.CreatePost(post)
+	err := p.postUseCase.CreatePost(post)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
 	}
@@ -58,7 +157,7 @@ func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 
 	authorID := c.Get("userID").(int64)
 
-	err = p.postUsecase.UpdatePost(postID, authorID, input.Name, input.Description, input.Type)
+	err = p.postUseCase.UpdatePost(postID, authorID, input.Name, input.Description, input.Type)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -66,18 +165,8 @@ func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "Post updated successfully"})
 }
 
-func (p *postHttpHandler) DeletePost(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *postHttpHandler) GetPost(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewPostHttpHandler(postUsecase usecase.PostUseCase) PostHandler {
+func NewPostHttpHandler(postUseCase usecase.PostUseCase) PostHandler {
 	return &postHttpHandler{
-		postUsecase: postUsecase,
+		postUseCase: postUseCase,
 	}
 }
