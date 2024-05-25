@@ -6,6 +6,7 @@ import (
 	middleware2 "DiplomaV2/middleware"
 	"DiplomaV2/user/models"
 	"DiplomaV2/user/usecase"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"net/http"
@@ -97,19 +98,14 @@ func (u *userHttpHandler) CheckAuth(c echo.Context) error {
 }
 
 func (u *userHttpHandler) Activation(c echo.Context) error {
-	var input struct {
-		TokenPlaintext string `json:"token"`
-	}
-	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
-	}
+	tokenPlaintext := c.Param("token")
 
 	v := validator.New()
-	if validator.ValidateTokenPlaintext(v, input.TokenPlaintext); !v.Valid() {
+	if validator.ValidateTokenPlaintext(v, tokenPlaintext); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
 	}
 
-	err := u.userUseCase.Activation(input.TokenPlaintext)
+	err := u.userUseCase.Activation(tokenPlaintext)
 	if err != nil {
 		println("activation error: " + err.Error())
 		return c.JSON(http.StatusInternalServerError, ErrFailedValidation.Error())
@@ -141,6 +137,7 @@ func (u *userHttpHandler) ForgotPassword(c echo.Context) error {
 	})
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Password reset email sent"})
+	//Todo with frontend
 }
 
 func (u *userHttpHandler) ResetPassword(c echo.Context) error {
@@ -228,15 +225,17 @@ func (u *userHttpHandler) Registration(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
+	activationLink := fmt.Sprintf("http://localhost:4000/v2/users/activate/%s", token.Plaintext)
+
 	u.background(func() error {
-		data := map[string]any{
+		data := map[string]interface{}{
 			"activationToken": token.Plaintext,
 			"userID":          user.ID,
+			"activationLink":  activationLink,
 		}
 		return u.mailer.Send(user.Email, "user_welcome.tmpl", data)
 	})
 
-	// If no error, send the response with status accepted and user data
 	return c.JSON(http.StatusCreated, map[string]interface{}{"user": user})
 }
 

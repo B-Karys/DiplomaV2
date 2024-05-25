@@ -10,8 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// JWTSecretKey is the key used to sign the JWT token.
-// Replace this with your actual secret key.
 var JWTSecretKey = []byte(os.Getenv("JWT_SECRET"))
 
 func LoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

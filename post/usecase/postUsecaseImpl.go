@@ -39,10 +39,25 @@ func (pos *postUseCaseImpl) DeletePost(id int64) error {
 	return nil
 }
 
-func (pos *postUseCaseImpl) UpdatePost(post *models.Post) error {
-	err := pos.Repo.Update(post)
+func (pos *postUseCaseImpl) UpdatePost(postID, userID int64, name string, description string, postType string) error {
+	post, err := pos.Repo.GetByID(postID)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	if post.AuthorID != userID {
+		return err
+	}
+
+	post.Name = name
+	post.Description = description
+	post.Type = postType
+
+	err = pos.Repo.Update(post)
+	if err != nil {
+		return err
+	}
+
+	return err
+
 }

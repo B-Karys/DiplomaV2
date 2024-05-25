@@ -5,19 +5,45 @@ import (
 	"DiplomaV2/post/usecase"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 )
 
 type postHttpHandler struct {
 	postUsecase usecase.PostUseCase
 }
 
-// HTTP handler
-func (p postHttpHandler) CreatePost(c echo.Context) error {
-	//Extract user ID from JWT token or any other authentication mechanism
+func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	userID := c.Get("userID").(int64)
 
-	// Parse request body
 	var input struct { //future: grpc message
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		Type        string   `json:"type"`
+		Skills      []string `json:"skills"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	post := &models.Post{
+		Name:        input.Name,
+		Description: input.Description,
+		Type:        input.Type,
+		Skills:      input.Skills,
+		AuthorID:    userID,
+	}
+
+	err := p.postUsecase.CreatePost(post)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "Successfully created post"})
+}
+
+func (p *postHttpHandler) UpdatePost(c echo.Context) error {
+	var input struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
 		Type        string `json:"type"`
@@ -27,36 +53,25 @@ func (p postHttpHandler) CreatePost(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	// Convert the string to int64
+	postIDs := c.Param("id")
+	postID, err := strconv.ParseInt(postIDs, 10, 64)
 
-	//Create a new Post object
-	post := &models.Post{
-		Name:        input.Name,
-		Description: input.Description,
-		Type:        input.Type,
-		AuthorID:    userID,
-	}
+	authorID := c.Get("userID").(int64)
 
-	// Call the use case to create a new post
-	err := p.postUsecase.CreatePost(post)
+	err = p.postUsecase.UpdatePost(postID, authorID, input.Name, input.Description, input.Type)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "Successfully created post"})
+	return c.JSON(http.StatusOK, map[string]string{"message": "Post updated successfully"})
 }
 
-func (p postHttpHandler) UpdatePost(c echo.Context) error {
+func (p *postHttpHandler) DeletePost(c echo.Context) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p postHttpHandler) DeletePost(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p postHttpHandler) GetPost(c echo.Context) error {
+func (p *postHttpHandler) GetPost(c echo.Context) error {
 	//TODO implement me
 	panic("implement me")
 }

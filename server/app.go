@@ -32,7 +32,7 @@ type echoServer struct {
 func NewEchoServer(conf *config.Config, db database.Database) Server {
 	echoApp := echo.New()
 	echoApp.Logger.SetLevel(log.DEBUG)
-	appMailer := mailer.New("sandbox.smtp.mailtrap.io", 25, "f77e84f49aea4c", "ab28a0e2848b3b", "Test <no-reply@test.com>")
+	appMailer := mailer.New("sandbox.smtp.mailtrap.io", 25, "6f71a6ef2443f6", "57f94aefae5b38", "Test <no-reply@test.com>")
 
 	return &echoServer{
 		app:    echoApp,
@@ -92,6 +92,7 @@ func (s *echoServer) initializePostHttpHandler() {
 
 	postRouters := s.app.Group("/v2/posts")
 	postRouters.POST("/", postHttpHandler.CreatePost, middleware2.LoginMiddleware)
+	postRouters.PATCH("/:id", postHttpHandler.UpdatePost, middleware2.LoginMiddleware)
 }
 
 func (s *echoServer) initializeUserHttpHandler() {
@@ -103,7 +104,7 @@ func (s *echoServer) initializeUserHttpHandler() {
 	userRouters := s.app.Group("/v2/users")
 	{
 		userRouters.POST("/registration", userHttpHandler.Registration)
-		userRouters.PUT("/", userHttpHandler.Activation)
+		userRouters.GET("/activate/:token", userHttpHandler.Activation)
 		userRouters.POST("/login", userHttpHandler.Authentication)
 		userRouters.GET("/check-auth", userHttpHandler.CheckAuth)
 		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, middleware2.LoginMiddleware)
