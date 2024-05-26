@@ -20,8 +20,10 @@ export function Home() {
     const [error, setError] = useState<string | null>(null);
     const [type, setType] = useState<string>('');
     const [skills, setSkills] = useState<string[]>([]);
+    const [sort, setSort] = useState<string>('created_at');
+    const [search, setSearch] = useState<string>('');
 
-    const fetchPosts = async (type: string, skills: string[]) => {
+    const fetchPosts = async (type: string, skills: string[], sort: string, search: string) => {
         setLoading(true);
         setError(null);
         try {
@@ -29,6 +31,8 @@ export function Home() {
             const params = new URLSearchParams();
             if (type) params.append('type', type);
             if (skills.length) params.append('skills', skills.join(','));
+            if (sort) params.append('sort', sort);
+            if (search) params.append('search', search);
             url += `?${params.toString()}`;
 
             const response = await axios.get<Post[]>(url);
@@ -45,12 +49,14 @@ export function Home() {
     };
 
     useEffect(() => {
-        fetchPosts(type, skills);
-    }, [type, skills]);
+        fetchPosts(type, skills, sort, search);
+    }, [type, skills, sort, search]);
 
-    const handleFilterChange = (selectedType: string, selectedSkills: string[]) => {
+    const handleFilterChange = (selectedType: string, selectedSkills: string[], selectedSort: string, searchQuery: string) => {
         setType(selectedType);
         setSkills(selectedSkills);
+        setSort(selectedSort);
+        setSearch(searchQuery);
     };
 
     if (loading) return <div>Loading...</div>;
@@ -59,7 +65,13 @@ export function Home() {
     return (
         <div className="container">
             <div className="filter-container">
-                <Filter initialType={type} initialSkills={skills} onFilterChange={handleFilterChange} />
+                <Filter
+                    initialType={type}
+                    initialSkills={skills}
+                    initialSort={sort}
+                    initialSearch={search}
+                    onFilterChange={handleFilterChange}
+                />
             </div>
             <div className="posts-container">
                 <div>

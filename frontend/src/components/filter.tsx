@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
 interface FilterProps {
-    onFilterChange: (type: string, skills: string[]) => void;
+    onFilterChange: (type: string, skills: string[], sort: string, search: string) => void;
     initialType: string;
     initialSkills: string[];
+    initialSort: string;
+    initialSearch: string;
 }
-// TODO: CREATE THE SKILLS AFTER MAKING THE METADATA
-const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSkills }) => {
+
+const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSkills, initialSort, initialSearch }) => {
     const [type, setType] = useState<string>(initialType);
     const [skills, setSkills] = useState<string[]>(initialSkills);
+    const [sort, setSort] = useState<string>(initialSort);
+    const [search, setSearch] = useState<string>(initialSearch);
 
     useEffect(() => {
         setType(initialType);
@@ -18,10 +22,18 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
         setSkills(initialSkills);
     }, [initialSkills]);
 
+    useEffect(() => {
+        setSort(initialSort);
+    }, [initialSort]);
+
+    useEffect(() => {
+        setSearch(initialSearch);
+    }, [initialSearch]);
+
     const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedType = event.target.value;
         setType(selectedType);
-        onFilterChange(selectedType, skills);
+        onFilterChange(selectedType, skills, sort, search);
     };
 
     const handleSkillChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,11 +43,23 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
             ? [...skills, skill]
             : skills.filter(s => s !== skill);
         setSkills(updatedSkills);
-        onFilterChange(type, updatedSkills);
+        onFilterChange(type, updatedSkills, sort, search);
+    };
+
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedSort = event.target.value;
+        setSort(selectedSort);
+        onFilterChange(type, skills, selectedSort, search);
+    };
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const searchQuery = event.target.value;
+        setSearch(searchQuery);
+        onFilterChange(type, skills, sort, searchQuery);
     };
 
     return (
-        <div style={{padding: '10px', border: '1px solid #ccc' }}>
+        <div style={{ padding: '10px', border: '1px solid #ccc' }}>
             <h2>Filter</h2>
             <div>
                 <label>
@@ -74,6 +98,25 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
                         onChange={handleSkillChange}
                     />
                     Python
+                </label>
+            </div>
+            <div>
+                <label>
+                    Sort by:
+                    <select value={sort} onChange={handleSortChange}>
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <label>
+                    Search:
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={handleSearchChange}
+                    />
                 </label>
             </div>
         </div>

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"DiplomaV2/internal/helpers"
+	"DiplomaV2/internal/validator"
 	"DiplomaV2/post/models"
 	"DiplomaV2/post/usecase"
 	"github.com/labstack/echo/v4"
@@ -14,56 +16,99 @@ type postHttpHandler struct {
 	postUseCase usecase.PostUseCase
 }
 
-func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
-	// Parse query parameters to extract filters
-	authorID := c.QueryParam("author_id")
-	postType := c.QueryParam("type")
-
-	// Convert postType to lowercase for searching
-	postType = strings.ToLower(postType)
-
-	// Call the appropriate use case method based on the presence of filters
-	if authorID != "" || postType != "" {
-		// If filters are provided, call the GetFilteredPosts method
-		posts, err := p.postUseCase.GetFilteredPosts(authorID, postType)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-		}
-		return c.JSON(http.StatusOK, posts)
-	} else {
-		// If no filters are provided, call the GetAllPosts method
-		posts, err := p.postUseCase.GetAllPosts()
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-		}
-		return c.JSON(http.StatusOK, posts)
-	}
-}
-
 func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 	userID := c.Get("userID").(int64)
-	// Parse query parameters to extract filters
-	authorID := strconv.FormatInt(userID, 10)
-	println("My User ID is: ", authorID)
-
-	postType := c.QueryParam("type")
-
-	// Call the appropriate use case method based on the presence of filters
-	if authorID != "" || postType != "" {
-		// If filters are provided, call the GetFilteredPosts method
-		posts, err := p.postUseCase.GetFilteredPosts(authorID, postType)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-		}
-		return c.JSON(http.StatusOK, posts)
-	} else {
-		// If no filters are provided, call the GetAllPosts method
-		posts, err := p.postUseCase.GetAllPosts()
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-		}
-		return c.JSON(http.StatusOK, posts)
+	userIDstring := strconv.FormatInt(userID, 10)
+	var input struct {
+		Name        string
+		Description string
+		PostType    string
+		Skills      []string
+		models.Filters
 	}
+
+	v := validator.New()
+
+	qs := c.Request().URL.Query()
+
+	//Search by words
+	input.Name = helpers.ReadString(qs, "name", "")
+	input.Description = helpers.ReadString(qs, "description", "")
+
+	//Show only one type
+	input.PostType = helpers.ReadString(qs, "type", "")
+
+	//Show the posts of certain author: will be needed for certain author profiles
+	//Show only by chosen skills
+	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
+
+	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
+	input.Filters.PageSize = helpers.ReadInt(qs, "pageSize", 20, v)
+	input.Filters.Sort = helpers.ReadString(qs, "sort", "created_at")
+	input.Filters.SortSafeList = []string{"name", "created_at", "-name", "-created_at"}
+
+	if !v.Valid() {
+		return c.JSON(http.StatusBadRequest, v.Errors)
+	}
+
+	if models.ValidateFilters(v, input.Filters); !v.Valid() {
+		return c.JSON(http.StatusBadRequest, v.Errors)
+	}
+
+	posts, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, userIDstring, input.PostType, input.Skills, input.Filters)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, posts)
+}
+
+func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
+	var input struct {
+		Name        string
+		Description string
+		Author      string
+		PostType    string
+		Skills      []string
+		models.Filters
+	}
+
+	v := validator.New()
+
+	qs := c.Request().URL.Query()
+
+	//Search by words
+	input.Name = helpers.ReadString(qs, "name", "")
+	input.Description = helpers.ReadString(qs, "description", "")
+
+	//Show only one type
+	input.PostType = helpers.ReadString(qs, "type", "")
+
+	//Show the posts of certain author: will be needed for certain author profiles
+	input.Author = helpers.ReadString(qs, "author", "")
+
+	//Show only by chosen skills
+	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
+
+	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
+	input.Filters.PageSize = helpers.ReadInt(qs, "pageSize", 20, v)
+	input.Filters.Sort = helpers.ReadString(qs, "sort", "created_at")
+	input.Filters.SortSafeList = []string{"name", "created_at", "-name", "-created_at"}
+
+	if !v.Valid() {
+		return c.JSON(http.StatusBadRequest, v.Errors)
+	}
+
+	if models.ValidateFilters(v, input.Filters); !v.Valid() {
+		return c.JSON(http.StatusBadRequest, v.Errors)
+	}
+
+	posts, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, input.Author, input.PostType, input.Skills, input.Filters)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, posts)
 }
 
 func (p *postHttpHandler) DeletePost(c echo.Context) error {
@@ -100,47 +145,6 @@ func (p *postHttpHandler) GetPostById(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, post)
 }
-
-/*
-func (p *postHttpHandler) GetPostByAuthor(c echo.Context) error {
-	var input struct {
-		AuthorID int64 `json:"author_id"`
-	}
-	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-	posts, err := p.postUseCase.GetPostByAuthor(input.AuthorID)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-	}
-	return c.JSON(http.StatusOK, posts)
-}
-*/
-
-//func (p *postHttpHandler) GetAllPosts(c echo.Context) error {
-//	// Extract filter criteria from query parameters
-//	authorID := c.QueryParam("author_id")
-//	postType := c.QueryParam("type")
-//	// Assuming more filters like skills, etc.
-//
-//	// Call the use case method passing the filter criteria
-//	posts, err := p.postUseCase.GetFilteredPosts(authorID, postType /*, additional filter criteria*/)
-//	if err != nil {
-//		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-//	}
-//	return c.JSON(http.StatusOK, posts)
-//}
-
-/*
-func (p *postHttpHandler) GetPostByType(c echo.Context) error {
-
-	posts, err := p.postUseCase.GetPostByType(c.QueryParam("type"))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
-	}
-	return c.JSON(http.StatusOK, posts)
-}
-*/
 
 func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	userID := c.Get("userID").(int64)
@@ -191,7 +195,7 @@ func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 
 	err = p.postUseCase.UpdatePost(postID, authorID, input.Name, input.Description, input.Skills, strings.ToLower(input.Type))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusConflict, map[string]string{"error": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Post updated successfully"})

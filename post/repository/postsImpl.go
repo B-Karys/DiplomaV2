@@ -3,6 +3,8 @@ package repository
 import (
 	"DiplomaV2/database"
 	"DiplomaV2/post/models"
+	"fmt"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -15,31 +17,9 @@ func NewPostRepository(db database.Database) PostRepository {
 	return &postRepository{DB: db}
 }
 
-/*
-func (m *postRepository) GetByType(postType string) ([]*models.Post, error) {
-	var posts []*models.Post
-	// Assuming your Post model is named Post and your table name is "posts"
-	if err := m.DB.GetDb().Where("type = ?", postType).Find(&posts).Error; err != nil {
-		return nil, err
-	}
-	return posts, nil
-}
-*/
-
 func (m *postRepository) Insert(post *models.Post) error {
 	result := m.DB.GetDb().Create(post)
 	return result.Error
-}
-
-func (m *postRepository) GetAll() ([]*models.Post, error) {
-	var posts []*models.Post
-	if err := m.DB.GetDb().Find(&posts).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
-		}
-		return nil, err
-	}
-	return posts, nil
 }
 
 func (m *postRepository) GetByID(postID int64) (*models.Post, error) {
@@ -79,24 +59,6 @@ func (m *postRepository) Update(post *models.Post) error {
 	return nil
 }
 
-/*
-func (m *postRepository) GetByAuthor(authorid int64) ([]*models.Post, error) {
-	if authorid < 1 {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	var posts []*models.Post
-	if err := m.DB.GetDb().Where("author_id = ?", authorid).Find(&posts).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
-		}
-		return nil, err
-	}
-
-	return posts, nil
-}
-*/
-
 func (m *postRepository) DeleteAllForUser(userID int64) error {
 	if userID < 1 {
 		return gorm.ErrRecordNotFound
@@ -110,28 +72,47 @@ func (m *postRepository) DeleteAllForUser(userID int64) error {
 	return nil
 }
 
-func (m *postRepository) GetByAuthorAndType(authorID string, postType string) ([]*models.Post, error) {
+func (m *postRepository) GetFilteredPosts(name, description, author, postType string, skills []string, filters models.Filters) ([]*models.Post, error) {
 	var posts []*models.Post
-	// Assuming your Post model is named Post and your table name is "posts"
-	if authorID != "" {
-		query := m.DB.GetDb().Where("author_id = ?", authorID)
-		if postType != "" {
-			// If postType is provided, add it as a filter
-			query = query.Where("type = ?", postType)
-		}
-		if err := query.Find(&posts).Error; err != nil {
-			return nil, err
-		}
-	} else if postType != "" {
-		// If only postType is provided, filter by postType
-		if err := m.DB.GetDb().Where("type = ?", postType).Find(&posts).Error; err != nil {
-			return nil, err
-		}
-	} else {
-		// If neither authorID nor postType is provided, return all posts
-		if err := m.DB.GetDb().Find(&posts).Error; err != nil {
-			return nil, err
+	query := m.DB.GetDb().Model(&models.Post{})
+
+	// Apply filters
+	if name != "" {
+		query = query.Where("name ILIKE ?", "%"+name+"%")
+	}
+	if description != "" {
+		query = query.Where("description ILIKE ?", "%"+description+"%")
+	}
+	if author != "" {
+		query = query.Where("author_id = ?", author)
+	}
+	if postType != "" {
+		query = query.Where("type = ?", postType)
+	}
+	if len(skills) > 0 {
+		query = query.Where("skills @> ?", pq.Array(skills))
+	}
+
+	// Apply sorting
+	if filters.Sort != "" && contains(filters.SortSafeList, filters.Sort) {
+		query = query.Order(fmt.Sprintf("%s %s", filters.SortColumn(), filters.SortDirection()))
+	}
+
+	// Apply pagination
+	query = query.Offset((filters.Page - 1) * filters.PageSize).Limit(filters.PageSize)
+
+	if err := query.Find(&posts).Error; err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func contains(list []string, value string) bool {
+	for _, v := range list {
+		if v == value {
+			return true
 		}
 	}
-	return posts, nil
+	return false
 }
