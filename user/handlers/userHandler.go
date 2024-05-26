@@ -9,6 +9,7 @@ type UserHandler interface {
 	CheckAuth(c echo.Context) error
 	GetUserInfoByEmail(c echo.Context) error
 	GetUserInfoById(c echo.Context) error
+	GetMyInfo(c echo.Context) error
 	UpdateUserInfo(c echo.Context) error
 	ChangePassword(c echo.Context) error
 	ResetPassword(c echo.Context) error

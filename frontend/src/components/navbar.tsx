@@ -61,43 +61,48 @@ export function Navbar() {
                                 </Menu.Target>
                                 <Menu.Dropdown opened={menuOpened} onClose={() => setMenuOpened(false)} className={classes.menuDropdown}>
                                     {/* Liked Posts */}
-                                    <Menu.Item color={"red"}
-                                               leftSection={
-                                                   <IconHeart
-                                                       style={{ width: rem(16), height: rem(16) }}
-                                                       color={theme.colors.red[6]}
-                                                       stroke={1.5}
-                                                   />
-                                               }
+                                    <Link to="/posts" className={classes.dropdownSubLink} color={"red"}>
+                                    <Menu.Item
+                                        className={`${classes.dropdownSubLink} ${classes.menuItemRed}`} // Apply the menu-item-red class
+                                        leftSection={
+                                            <IconHeart
+                                                style={{ width: rem(16), height: rem(16) }}
+                                                color={theme.colors.red[6]}
+                                                stroke={1.5}
+                                            />
+                                        }
                                     >
-                                        <Link to="/posts" className={classes.dropdownSubLink}>
                                             Liked posts
-                                        </Link>
                                     </Menu.Item>
+                                    </Link>
+
+
 
                                     <Menu.Divider />
 
                                     {/* My Profile */}
+                                    <Link to="/profile" className={classes.dropdownSubLink} >
                                     <Menu.Item
                                         leftSection={
                                             <IconUser style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
                                         }
                                     >
-                                        <Link to="/profile" className={classes.dropdownSubLink} >
                                             My Profile
-                                        </Link>
                                     </Menu.Item>
+                                    </Link>
+
 
                                     {/* Manage Account */}
+                                    <Link to="/profile/settings">
+
                                     <Menu.Item
                                         leftSection={
                                             <IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
                                         }
                                     >
-                                        <Link to="/profile/settings">
                                             Manage Account
-                                        </Link>
                                     </Menu.Item>
+                                    </Link>
 
                                     {/* Logout */}
                                     <Menu.Item

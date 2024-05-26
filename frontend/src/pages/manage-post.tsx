@@ -11,7 +11,7 @@ interface Post {
     skills: string[];
 }
 
-const ManagePost: React.FC = () => {
+export const ManagePost: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [post, setPost] = useState<Post>({
         id: 0,

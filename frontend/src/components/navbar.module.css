@@ -73,13 +73,26 @@
 }
 
 /* Dropdown Sublinks */
+/* Dropdown Sublinks */
 .dropdown-subLink {
     width: 100%;
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
     border-radius: var(--mantine-radius-md);
-    text-decoration: none;
+    text-decoration: none !important;
     color: inherit; /* Inherit color from parent */
 }
+
+/* Ensure that the color is red for Liked posts */
+.menu-item-red {
+    color: red !important; /* Override any other styles */
+}
+
+/* Add this rule to remove text decoration for active or visited links */
+.dropdown-subLink:active,
+.dropdown-subLink:visited {
+    text-decoration: none !important;
+}
+
 
 .dropdown-subLink:hover {
     background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));

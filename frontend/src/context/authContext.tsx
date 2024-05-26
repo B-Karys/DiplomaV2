@@ -12,34 +12,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const storedAuthenticated = localStorage.getItem('authenticated') === 'true';
-        if (storedAuthenticated) {
-            setIsAuthenticated(true);
-            return;
-        }
-
-        fetch('http://localhost:4000/v2/users/check-auth', {
-            method: 'GET',
-            credentials: 'include',
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.authenticated === "true") {
-                    setIsAuthenticated(true);
-                    localStorage.setItem('authenticated', 'true');
-                } else {
-                    setIsAuthenticated(false);
-                    localStorage.removeItem('authenticated');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                setIsAuthenticated(false);
-            });
+        setIsAuthenticated(storedAuthenticated);
     }, []);
 
     const contextValue: AuthContextType = {
         isAuthenticated,
-        setIsAuthenticated
+        setIsAuthenticated,
     };
 
     return (

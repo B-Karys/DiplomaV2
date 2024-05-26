@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import './profilepage.css';
 
 interface User {
     id: number;
@@ -9,8 +10,9 @@ interface User {
     telegram: string;
     discord: string;
     email: string;
-    skills: string | null;
+    skills: string[] | null;
     activated: boolean;
+    profileImage: string;
 }
 
 export function ProfilePage() {
@@ -19,35 +21,17 @@ export function ProfilePage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const parseJwt = (token: string) => {
-            try {
-                return JSON.parse(atob(token.split('.')[1]));
-            } catch (e) {
-                return null;
-            }
-        };
-
-        const jwtCookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('jwt='));
-
-        if (jwtCookie) {
-            const jwtToken = jwtCookie.split('=')[1];
-            const decodedToken = parseJwt(jwtToken);
-
-            if (decodedToken) {
-                const userId = decodedToken.sub; // Assuming 'sub' holds the user ID
-                fetchUserData(userId, jwtToken);
-            }
-        }
+        fetchUserData();
     }, []);
 
-    const fetchUserData = async (userId: number, token: string) => {
+    const fetchUserData = async () => {
         try {
-            const response = await fetch(`http://localhost:4000/v2/users/${userId}`, {
+            const response = await fetch('http://localhost:4000/v2/users/my', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include', // Ensure cookies are included in the request
             });
 
             if (!response.ok) {
@@ -58,8 +42,7 @@ export function ProfilePage() {
             setUser(userData);
             setLoading(false);
         } catch (error) {
-            // @ts-ignore
-            setError(error.message);
+            setError((error as Error).message);
             setLoading(false);
             console.error('Error fetching user data:', error);
         }
@@ -74,21 +57,35 @@ export function ProfilePage() {
     }
 
     return (
-        <div>
-            <h1>Profile</h1>
-            {user ? (
-                <div>
-                    <p>Name: {user.name}</p>
-                    <p>Surname: {user.surname}</p>
-                    <p>Username: {user.username}</p>
-                    <p>Telegram: {user.telegram}</p>
-                    <p>Discord: {user.discord}</p>
-                    <p>Email: {user.email}</p>
-                    <p>Skills: {user.skills}</p>
+        <div className="profile-container">
+            <div className="profile-content">
+                <div className="profile-sidebar">
+                    <div className="profile-photo">
+                        {user?.profileImage ? (
+                            <img src={user.profileImage} alt="Profile" />
+                        ) : (
+                            'Profile Photo Of User'
+                        )}
+                    </div>
+                    <div className="profile-contacts">
+                        <p>@{user?.telegram}</p>
+                        <p>@{user?.discord}</p>
+                    </div>
                 </div>
-            ) : (
-                <p>No user data available</p>
-            )}
+                <div className="profile-main">
+                    <h1>{user?.name} ({user?.username}) {user?.surname}</h1>
+                    <p>{user?.activated ? 'Active' : 'Inactive'} user interested in various technologies and projects.</p>
+                    <div className="profile-skills">
+                        {user?.skills?.map((skill, index) => (
+                            <p key={index}>{skill}</p>
+                        ))}
+                    </div>
+                    <div className="profile-team">
+                        <h2>Team Name</h2>
+                        <p>Team Description</p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -13,5 +13,5 @@ type Post struct {
 	AuthorID    int64          `gorm:"not null" json:"authorId"`
 	Type        string         `gorm:"not null" json:"type"`
 	Skills      pq.StringArray `gorm:"type:text[];" json:"skills"`
-	Version     int            `gorm:"autoIncrement;not null; default:1" json:"-"`
+	Version     int            `gorm:"not null; default:1" json:"-"`
 }

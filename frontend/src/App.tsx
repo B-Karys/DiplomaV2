@@ -1,15 +1,16 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
+import { Authentication } from './pages/authentication';
+import { Registration } from './pages/registration';
+import { Home } from './pages/home';
+import { ProfilePage } from './pages/profilepage';
+import { AuthProvider, useAuth } from './context/authContext';
+import { Navbar } from "./components/navbar";
+import { MyPosts } from "./pages/myPosts";
+import { ManagePost } from "./pages/manage-post";
+
 import '@mantine/core/styles.css';
-import { Authentication } from './pages/authentication.tsx';
-import { Registration } from './pages/registration.tsx';
-import { Home } from './pages/home.tsx';
-import  { ProfilePage } from './pages/profilepage.tsx'; // Import ProfilePage component
-import { AuthProvider, useAuth } from './context/authContext.tsx';
-import { Navbar } from "./components/navbar.tsx";
-import "./components/navbar.module.css"
-import {MyPosts} from "./pages/myPosts.tsx";
-import ManagePost from "./pages/manage-post.tsx";
+import "./components/navbar.module.css";
 
 export default function App() {
     return (
@@ -18,9 +19,9 @@ export default function App() {
                 <Router>
                     <Navbar />
                     <Routes>
-                        <Route path="/" element={<HomeRoute />} />
+                        <Route path="/" element={<Home />} />
                         <Route path="/login" element={<AuthenticationRoute />} />
-                        <Route path="/register" element={<Registration />} />
+                        <Route path="/register" element={<RegistrationRoute />} />
                         <Route path="/profile" element={<ProfileRoute />} />
                         <Route path="/posts" element={<MyPostsRoute />} />
                         <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
@@ -31,25 +32,28 @@ export default function App() {
     );
 }
 
-// Define routes with authentication checks
-const HomeRoute = () => {
-    return <Home />;
-};
-
 const AuthenticationRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <Navigate to="/" /> : <Authentication />;
 };
 
-const ProfileRoute = () => {
-    const { isAuthenticated } = useAuth();
-    return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />;
-};
+const RegistrationRoute = () => {
+    const {isAuthenticated} = useAuth();
+    return isAuthenticated ? <Navigate to="/" /> : <Registration />;
+}
 
 const MyPostsRoute = () => {
-    return <MyPosts />;
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <MyPosts /> : <Navigate to="/login" />;
 }
 
 const ManagePostsRoute = () => {
-    return <ManagePost />;
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <ManagePost /> : <Navigate to="/login" />;
 }
+
+const ProfileRoute = () => {
+    const { isAuthenticated } = useAuth();
+    console.log(isAuthenticated)
+    return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />;
+};

@@ -1,0 +1,81 @@
+.profile-container {
+    font-family: Arial, sans-serif;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f1f1f1;
+    padding: 10px;
+}
+
+.profile-nav a {
+    margin-right: 15px;
+    text-decoration: none;
+    color: #000;
+}
+
+.profile-icons {
+    display: flex;
+    align-items: center;
+}
+
+.profile-notification-icon,
+.profile-username-icon {
+    margin-left: 15px;
+}
+
+.profile-content {
+    display: flex;
+    padding: 20px;
+}
+
+.profile-sidebar {
+    width: 25%;
+    padding: 10px;
+}
+
+.profile-photo {
+    width: 400px;
+    height: 400px;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-photo img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 50%; /* Optional: make the image circular */
+}
+
+.profile-contacts p {
+    margin: 5px 0;
+}
+
+.profile-main {
+    width: 75%;
+    padding: 10px;
+}
+
+.profile-skills p {
+    margin: 5px 0;
+}
+
+.profile-team h2 {
+    margin-top: 20px;
+}
+
+.profile-team p {
+    margin-top: 10px;
+}
+
+.profile-projects a {
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: #007bff;
+}

@@ -83,6 +83,15 @@ func (u *userHttpHandler) Authentication(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": "User successfully authenticated"})
 }
 
+func (u *userHttpHandler) GetMyInfo(c echo.Context) error {
+	userID := c.Get("userID").(int64)
+	user, err := u.userUseCase.GetUserById(userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, user)
+}
+
 func (u *userHttpHandler) CheckAuth(c echo.Context) error {
 	// Use LoginMiddleware to extract and validate the JWT token from the cookie
 	err := middleware2.LoginMiddleware(func(c echo.Context) error {
@@ -268,26 +277,18 @@ func (u *userHttpHandler) GetUserInfoById(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-	data := &models.User{
-		Email:    user.Email,
-		Name:     user.Name,
-		Surname:  user.Surname,
-		Username: user.Username,
-		Telegram: user.Telegram,
-		Discord:  user.Discord,
-		Skills:   user.Skills,
-	}
-
 	// Return the user information
-	return c.JSON(http.StatusOK, data)
+	return c.JSON(http.StatusOK, user)
 }
 
 func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 	var input struct {
-		Surname  string   `json:"surname"`
-		Telegram string   `json:"telegram"`
-		Discord  string   `json:"discord"`
-		Skills   []string `json:"skills"`
+		Name         string   `json:"name"`
+		Surname      string   `json:"surname"`
+		Telegram     string   `json:"telegram"`
+		Discord      string   `json:"discord"`
+		Skills       []string `json:"skills"`
+		ProfileImage string   `json:"profileImage"`
 	}
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
@@ -297,7 +298,7 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 	userID := c.Get("userID").(int64)
 
 	// Call the use case to update the user
-	err := u.userUseCase.UpdateUserInfo(userID, input.Surname, input.Telegram, input.Discord, input.Skills)
+	err := u.userUseCase.UpdateUserInfo(userID, input.Name, input.Surname, input.Telegram, input.Discord, input.Skills, input.ProfileImage)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

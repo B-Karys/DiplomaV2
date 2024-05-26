@@ -8,18 +8,19 @@ import (
 )
 
 type User struct {
-	ID        int64          `gorm:"primaryKey;autoIncrement:true" json:"id"`
-	CreatedAt time.Time      `gorm:"not null;default:current_timestamp" json:"created_at"`
-	Name      string         `gorm:"not null" json:"name"`
-	Surname   string         `json:"surname"`
-	Username  string         `gorm:"unique; not null" json:"username"`
-	Telegram  string         `json:"telegram"`
-	Discord   string         `json:"discord"`
-	Email     string         `gorm:"type:citext;unique;not null" json:"email"`
-	Skills    pq.StringArray `gorm:"type:text[]" json:"skills"`
-	Password  password       `gorm:"embedded;embeddedPrefix:password_" json:"-"`
-	Activated bool           `gorm:"default:false;not null" json:"activated"`
-	Version   int            `gorm:"autoIncrement;not null" json:"-"`
+	ID           int64          `gorm:"primaryKey;autoIncrement:true" json:"id"`
+	CreatedAt    time.Time      `gorm:"not null;default:current_timestamp" json:"created_at"`
+	Name         string         `gorm:"not null" json:"name"`
+	Surname      string         `json:"surname"`
+	Username     string         `gorm:"unique; not null" json:"username"`
+	Telegram     string         `json:"telegram"`
+	Discord      string         `json:"discord"`
+	Email        string         `gorm:"type:citext;unique;not null" json:"email"`
+	Skills       pq.StringArray `gorm:"type:text[]" json:"skills"`
+	Password     password       `gorm:"embedded;embeddedPrefix:password_" json:"-"`
+	ProfileImage string         `json:"profileImage"`
+	Activated    bool           `gorm:"default:false;not null" json:"activated"`
+	Version      int            `gorm:"autoIncrement;not null" json:"-"`
 }
 
 type Token struct {
