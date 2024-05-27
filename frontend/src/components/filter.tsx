@@ -1,39 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import './filter.module.css'; // Import the CSS file for styling
 
 interface FilterProps {
-    onFilterChange: (type: string, skills: string[], sort: string, search: string) => void;
+    onFilterChange: (type: string, skills: string[], sort: string,) => void;
     initialType: string;
     initialSkills: string[];
     initialSort: string;
     initialSearch: string;
 }
 
-const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSkills, initialSort, initialSearch }) => {
+const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSkills, initialSort, }) => {
     const [type, setType] = useState<string>(initialType);
     const [skills, setSkills] = useState<string[]>(initialSkills);
-    const [sort, setSort] = useState<string>(initialSort);
-    const [search, setSearch] = useState<string>(initialSearch);
-
-    useEffect(() => {
-        setType(initialType);
-    }, [initialType]);
-
-    useEffect(() => {
-        setSkills(initialSkills);
-    }, [initialSkills]);
-
-    useEffect(() => {
-        setSort(initialSort);
-    }, [initialSort]);
-
-    useEffect(() => {
-        setSearch(initialSearch);
-    }, [initialSearch]);
-
+    const [sortField, setSortField] = useState<string>(initialSort);
     const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedType = event.target.value;
         setType(selectedType);
-        onFilterChange(selectedType, skills, sort, search);
     };
 
     const handleSkillChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,36 +25,36 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
             ? [...skills, skill]
             : skills.filter(s => s !== skill);
         setSkills(updatedSkills);
-        onFilterChange(type, updatedSkills, sort, search);
     };
 
-    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedSort = event.target.value;
-        setSort(selectedSort);
-        onFilterChange(type, skills, selectedSort, search);
+    const handleSortFieldChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedSortField = event.target.value;
+        setSortField(selectedSortField);
     };
 
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const searchQuery = event.target.value;
-        setSearch(searchQuery);
-        onFilterChange(type, skills, sort, searchQuery);
-    };
+
+
+    useEffect(() => {
+        // Submit the filters when type, skills, sortField, sortOrder, or search change
+        onFilterChange(type, skills, sortField, );
+    }, [type, skills, sortField, ]);
 
     return (
-        <div style={{ padding: '10px', border: '1px solid #ccc' }}>
+        <div className="filter-container">
             <h2>Filter</h2>
-            <div>
+            <div className="filter-group">
                 <label>
                     Select a type:
                     <select value={type} onChange={handleTypeChange}>
                         <option value="">Select a type</option>
-                        <option value="teamFinding">Team Finding</option>
-                        <option value="userFinding">User Finding</option>
+                        <option value="team finding">Team Finding</option>
+                        <option value="user finding">User Finding</option>
                     </select>
                 </label>
             </div>
-            <div>
-                <label>
+            <div className="filter-group">
+                Select skills:
+                <label className="checkbox-label">
                     <input
                         type="checkbox"
                         name="javascript"
@@ -81,7 +63,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
                     />
                     JavaScript
                 </label>
-                <label>
+                <label className="checkbox-label">
                     <input
                         type="checkbox"
                         name="golang"
@@ -90,7 +72,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
                     />
                     Golang
                 </label>
-                <label>
+                <label className="checkbox-label">
                     <input
                         type="checkbox"
                         name="python"
@@ -99,24 +81,32 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
                     />
                     Python
                 </label>
-            </div>
-            <div>
-                <label>
-                    Sort by:
-                    <select value={sort} onChange={handleSortChange}>
-                        <option value="asc">Ascending</option>
-                        <option value="desc">Descending</option>
-                    </select>
+                <label className="checkbox-label">
+                    <input
+                        type="checkbox"
+                        name="java"
+                        checked={skills.includes('java')}
+                        onChange={handleSkillChange}
+                    />
+                    Java
+                </label>
+                <label className="checkbox-label">
+                    <input
+                        type="checkbox"
+                        name="c++"
+                        checked={skills.includes('c++')}
+                        onChange={handleSkillChange}
+                    />
+                    C++
                 </label>
             </div>
-            <div>
+            <div className="filter-group">
                 <label>
-                    Search:
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={handleSearchChange}
-                    />
+                    Sort by:
+                    <select value={sortField} onChange={handleSortFieldChange}>
+                        <option value="name">Name</option>
+                        <option value="created_at">Created At</option>
+                    </select>
                 </label>
             </div>
         </div>

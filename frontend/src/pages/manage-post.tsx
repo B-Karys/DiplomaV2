@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import './manage-posts.css'; // Import the CSS file for styling
 
 interface Post {
     id: number;
@@ -13,6 +14,7 @@ interface Post {
 
 export const ManagePost: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate(); // Initialize the navigate function
     const [post, setPost] = useState<Post>({
         id: 0,
         createdAt: '',
@@ -69,7 +71,8 @@ export const ManagePost: React.FC = () => {
             await axios.patch(`http://localhost:4000/v2/posts/${id}`, post, {
                 withCredentials: true,
             });
-            // Optionally, redirect to another page or show a success message
+            // Redirect to the posts page after successful save
+            navigate('/posts');
         } catch (error) {
             console.error('Error updating post:', error);
             // Handle error, show error message, etc.
@@ -79,38 +82,38 @@ export const ManagePost: React.FC = () => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
-    // Concatenate skills array into a comma-separated string
-    const skillsString = post.skills.join(', ');
-
     return (
         <div className="container">
             <h1>Edit Post</h1>
-            <div>
-                <label htmlFor="name">Name:</label>
-                <input type="text" id="name" name="name" value={post.name} onChange={handleInputChange} />
-            </div>
-            <div>
-                <label htmlFor="description">Description:</label>
-                <textarea id="description" name="description" value={post.description} onChange={handleInputChange} />
-            </div>
-            <div>
-                <label htmlFor="type">Type:</label>
-                <select id="type" name="type" value={post.type} onChange={handleInputChange}>
-                    <option value="team finding">Team Finding</option>
-                    <option value="user finding">User Finding</option>
-                </select>
-            </div>
-            <div>
-                <label>Skills:</label>
-                {['golang', 'python', 'java', 'javascript'].map(skill => (
-                    <label key={skill}>
-                        <input type="checkbox" name="skills" value={skill} checked={post.skills.includes(skill)} onChange={() => handleCheckboxChange(skill)} />
-                        {skill}
-                    </label>
-                ))}
-                <p>Selected Skills: {skillsString}</p>
-            </div>
-            <button onClick={handleSave}>Save</button>
+            <form>
+                <div className="form-group">
+                    <label htmlFor="name">Name:</label>
+                    <input type="text" id="name" name="name" value={post.name} onChange={handleInputChange} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="description">Description:</label>
+                    <textarea id="description" name="description" value={post.description} onChange={handleInputChange} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="type">Type:</label>
+                    <select id="type" name="type" value={post.type} onChange={handleInputChange}>
+                        <option value="team finding">Team Finding</option>
+                        <option value="user finding">User Finding</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label>Skills:</label>
+                    {['golang', 'python', 'java', 'javascript'].map(skill => (
+                        <label key={skill} className="checkbox-label">
+                            <input type="checkbox" name="skills" value={skill} checked={post.skills.includes(skill)} onChange={() => handleCheckboxChange(skill)} />
+                            {skill}
+                        </label>
+                    ))}
+                </div>
+                <div className="form-group">
+                    <button type="button" onClick={handleSave}>Save</button>
+                </div>
+            </form>
         </div>
     );
 };

@@ -1,0 +1,44 @@
+
+.filter-container {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 25%;
+}
+
+.filter-group {
+    margin-bottom: 20px; /* Add space between groups */
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 10px; /* Space between label and input */
+}
+
+.filter-group input[type="text"],
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+.filter-group input[type="checkbox"],
+.filter-group input[type="radio"] {
+    margin-right: 10px; /* Add space between checkbox/radio and label */
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Add space between checkboxes */
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+/* Add extra margin specifically between search and sort by fields */
+.filter-group.search-group {
+    margin-bottom: 30px; /* Increase margin for more space */
+}

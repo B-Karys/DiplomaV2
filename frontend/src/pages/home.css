@@ -1,21 +1,19 @@
-.container {
+.myContainer {
     display: flex;
     justify-content: space-between;
     padding: 20px;
-}
-
-.filter-container {
-    width: 25%;
-    padding-right: 10px;
+    width: 100%;
 }
 
 .posts-container {
     width: 70%;
-    padding-right: 100px;
+    padding-right: 10px;
 }
 
 .post {
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

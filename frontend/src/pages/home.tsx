@@ -63,7 +63,7 @@ export function Home() {
     if (error) return <div>Error loading posts: {error}</div>;
 
     return (
-        <div className="container">
+        <div className="myContainer">
             <div className="filter-container">
                 <Filter
                     initialType={type}
@@ -74,18 +74,16 @@ export function Home() {
                 />
             </div>
             <div className="posts-container">
-                <div>
-                    {posts.map(post => (
-                        <div key={post.id} className="post">
-                            <h2>{post.name}</h2>
-                            <p>{post.description}</p>
-                            <p>Author ID: {post.authorId}</p>
-                            <p>Type: {post.type}</p>
-                            <p>Skills: {post.skills.join(', ')}</p>
-                            <p>Created At: {new Date(post.createdAt).toLocaleString()}</p>
-                        </div>
-                    ))}
-                </div>
+                {posts.map(post => (
+                    <div key={post.id} className="post">
+                        <h2>{post.name}</h2>
+                        <p>{post.description}</p>
+                        <p>Author ID: {post.authorId}</p>
+                        <p>Type: {post.type}</p>
+                        <p>Skills: {post.skills.join(', ')}</p>
+                        <p>Created At: {new Date(post.createdAt).toLocaleDateString()}</p>
+                    </div>
+                ))}
             </div>
         </div>
     );

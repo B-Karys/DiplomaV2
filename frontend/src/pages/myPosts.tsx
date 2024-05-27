@@ -45,7 +45,7 @@ export function MyPosts() {
     if (error) return <div>Error loading posts: {error}</div>;
 
     return (
-        <div className="container">
+        <div className="myContainer">
             {/*<div className="filter-container">*/}
             {/*    <Filter />*/}
             {/*</div>*/}
