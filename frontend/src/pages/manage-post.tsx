@@ -50,10 +50,18 @@ export const ManagePost: React.FC = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setPost(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
+        // Handle type separately to ensure it is always updated
+        if (name === 'type') {
+            setPost(prevState => ({
+                ...prevState,
+                type: value,
+            }));
+        } else {
+            setPost(prevState => ({
+                ...prevState,
+                [name]: value,
+            }));
+        }
     };
 
     const handleCheckboxChange = (skill: string) => {
@@ -76,6 +84,23 @@ export const ManagePost: React.FC = () => {
         } catch (error) {
             console.error('Error updating post:', error);
             // Handle error, show error message, etc.
+        }
+    };
+
+    const handleDelete = async () => {
+        // Display confirmation dialog before deleting
+        const confirmDelete = window.confirm('Are you sure you want to delete this post?');
+        if (confirmDelete) {
+            try {
+                await axios.delete(`http://localhost:4000/v2/posts/${id}`, {
+                    withCredentials: true,
+                });
+                // Redirect to the posts page after successful delete
+                navigate('/posts');
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                // Handle error, show error message, etc.
+            }
         }
     };
 
@@ -112,6 +137,7 @@ export const ManagePost: React.FC = () => {
                 </div>
                 <div className="form-group">
                     <button type="button" onClick={handleSave}>Save</button>
+                    <button type="button" onClick={handleDelete} style={{ backgroundColor: '#b14040', marginTop: '10px' }}>Delete</button>
                 </div>
             </form>
         </div>
@@ -119,3 +145,4 @@ export const ManagePost: React.FC = () => {
 };
 
 export default ManagePost;
+// b14040

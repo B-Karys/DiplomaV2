@@ -24,6 +24,9 @@
     font-weight: 500;
     font-size: var(--mantine-font-size-sm);
 }
+.m_4081bf90 {
+    flex-wrap: nowrap !important;
+}
 
 .link:hover {
     background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));

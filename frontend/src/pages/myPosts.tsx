@@ -50,7 +50,6 @@ export function MyPosts() {
             {/*    <Filter />*/}
             {/*</div>*/}
             <div className="posts-container">
-                <h1>This is My Posts page</h1>
                 <div>
                     {posts.map(post => (
                         <div key={post.id} className="post">

@@ -11,6 +11,7 @@ import { ManagePost } from "./pages/manage-post";
 
 import '@mantine/core/styles.css';
 import "./components/navbar.module.css";
+import CreatePost from "./pages/create-post.tsx";
 
 export default function App() {
     return (
@@ -24,6 +25,7 @@ export default function App() {
                         <Route path="/register" element={<RegistrationRoute />} />
                         <Route path="/profile" element={<ProfileRoute />} />
                         <Route path="/posts" element={<MyPostsRoute />} />
+                        <Route path="/create-post" element={<CreatePostsRoute /> } />
                         <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
                     </Routes>
                 </Router>
@@ -45,6 +47,11 @@ const RegistrationRoute = () => {
 const MyPostsRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <MyPosts /> : <Navigate to="/login" />;
+}
+
+const CreatePostsRoute = () => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <CreatePost /> : <Navigate to="/login" />;
 }
 
 const ManagePostsRoute = () => {
