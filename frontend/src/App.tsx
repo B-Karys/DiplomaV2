@@ -3,15 +3,16 @@ import { MantineProvider } from '@mantine/core';
 import { Authentication } from './pages/authentication';
 import { Registration } from './pages/registration';
 import { Home } from './pages/home';
-import { ProfilePage } from './pages/profilepage';
+import { ProfilePage } from './pages/profile-page.tsx';
 import { AuthProvider, useAuth } from './context/authContext';
 import { Navbar } from "./components/navbar";
-import { MyPosts } from "./pages/myPosts";
+import { MyPosts } from "./pages/my-posts.tsx";
 import { ManagePost } from "./pages/manage-post";
 import  { CreatePost } from "./pages/create-post";
 
 import '@mantine/core/styles.css';
 import "./components/navbar.module.css";
+import  {ManageProfile } from "./pages/manage-profile.tsx";
 
 export default function App() {
     return (
@@ -24,6 +25,7 @@ export default function App() {
                         <Route path="/login" element={<AuthenticationRoute />} />
                         <Route path="/register" element={<RegistrationRoute />} />
                         <Route path="/profile" element={<ProfileRoute />} />
+                        <Route path="/profile/settings" element={<ManageProfileRoute />} />
                         <Route path="/posts" element={<MyPostsRoute />} />
                         <Route path="/create-post" element={<CreatePostsRoute />} />
                         <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
@@ -65,3 +67,9 @@ const ProfileRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />;
 };
+
+const ManageProfileRoute = () => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <ManageProfile /> : <Navigate to="/login" />;
+};
+

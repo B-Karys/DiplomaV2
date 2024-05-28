@@ -95,7 +95,7 @@ func (u *userUseCaseImpl) Registration(user *models.User) (*models.Token, error)
 	return token, nil
 }
 
-func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname string, telegram string, discord string, skills []string, profileImage string) error {
+func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, telegram, discord string, skills []string, profileImage string) error {
 	user, err := u.repo.GetByID(userID)
 	if err != nil {
 		return err
@@ -106,13 +106,16 @@ func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname string, tel
 	user.Telegram = telegram
 	user.Discord = discord
 	user.Skills = skills
-	user.ProfileImage = profileImage
+
+	if profileImage != "" {
+		user.ProfileImage = profileImage
+	}
 
 	err = u.repo.Update(user)
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 func (u *userUseCaseImpl) DeleteUser(id int64) error {

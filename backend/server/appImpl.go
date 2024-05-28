@@ -19,6 +19,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type echoServer struct {
@@ -44,6 +46,7 @@ func NewEchoServer(conf *config.Config, db database.Database) Server {
 func (s *echoServer) Start() {
 	s.app.Use(middleware.Recover())
 	s.app.Use(middleware.Logger())
+	s.app.Static("/uploads", filepath.Join(os.Getenv("HOME"), "Desktop", "uploads"))
 	// CORS middleware with configuration
 	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:5173"}, // Specify your React frontend domain here
@@ -99,11 +102,11 @@ func (s *echoServer) initializeUserHttpHandler() {
 		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, middleware2.LoginMiddleware)
 		userRouters.GET("/my", userHttpHandler.GetMyInfo, middleware2.LoginMiddleware)
 		userRouters.PATCH("/update", userHttpHandler.UpdateUserInfo, middleware2.LoginMiddleware)
-		userRouters.PATCH("/password", userHttpHandler.ChangePassword, middleware2.LoginMiddleware)
+		userRouters.PATCH("/password", userHttpHandler.ChangePassword, middleware2.LoginMiddleware) //
 		userRouters.POST("/logout", userHttpHandler.Logout, middleware2.LoginMiddleware)
-		userRouters.DELETE("/:id", userHttpHandler.DeleteUser, middleware2.LoginMiddleware)
-		userRouters.POST("/forgot-password", userHttpHandler.ForgotPassword)
-		userRouters.POST("/reset-password", userHttpHandler.ResetPassword)
+		userRouters.DELETE("/:id", userHttpHandler.DeleteUser, middleware2.LoginMiddleware) //
+		userRouters.POST("/forgot-password", userHttpHandler.ForgotPassword)                //
+		userRouters.POST("/reset-password", userHttpHandler.ResetPassword)                  //
 	}
 }
 

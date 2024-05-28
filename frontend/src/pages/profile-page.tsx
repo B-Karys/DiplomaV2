@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './profilepage.css';
+import './profile-page.css';
 
 interface User {
     id: number;
@@ -12,7 +12,7 @@ interface User {
     email: string;
     skills: string[] | null;
     activated: boolean;
-    profileImage: string;
+    profileImage: string; // Change to the GCS URL
 }
 
 export function ProfilePage() {
@@ -62,7 +62,7 @@ export function ProfilePage() {
                 <div className="profile-sidebar">
                     <div className="profile-photo">
                         {user?.profileImage ? (
-                            <img src={user.profileImage} alt="Profile" />
+                            <img src={user.profileImage} alt="Profile" /> // Update to use the GCS URL
                         ) : (
                             'Profile Photo Of User'
                         )}

@@ -74,7 +74,7 @@ func (m *userRepository) GetByEmail(email string) (*models.User, error) {
 }
 
 func (m *userRepository) Update(user *models.User) error {
-	// Use GORM's Updates method to update the user
+	// Use GORM's Save method to update the user
 	result := m.DB.GetDb().Save(user)
 	// Check for errors
 	if result.Error != nil {

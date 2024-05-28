@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"DiplomaV2/backend/internal/helpers"
 	"DiplomaV2/backend/internal/mailer"
 	middleware2 "DiplomaV2/backend/internal/middleware"
 	"DiplomaV2/backend/internal/validator"
@@ -9,6 +10,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"golang.org/x/net/context"
 	"net/http"
 	"strconv"
 	"time"
@@ -84,11 +86,16 @@ func (u *userHttpHandler) Authentication(c echo.Context) error {
 }
 
 func (u *userHttpHandler) GetMyInfo(c echo.Context) error {
+	// Get the user ID from the context
 	userID := c.Get("userID").(int64)
+
+	// Retrieve the user's profile data from the database
 	user, err := u.userUseCase.GetUserById(userID)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
+
+	// Return the user's profile data
 	return c.JSON(http.StatusOK, user)
 }
 
@@ -280,29 +287,67 @@ func (u *userHttpHandler) GetUserInfoById(c echo.Context) error {
 	// Return the user information
 	return c.JSON(http.StatusOK, user)
 }
-
 func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
-	var input struct {
-		Name         string   `json:"name"`
-		Surname      string   `json:"surname"`
-		Telegram     string   `json:"telegram"`
-		Discord      string   `json:"discord"`
-		Skills       []string `json:"skills"`
-		ProfileImage string   `json:"profileImage"`
+	// Log the incoming request
+	fmt.Println("Updating user info...")
+
+	// Parse the multipart form data
+	form, err := c.MultipartForm()
+	if err != nil {
+		fmt.Println("Error parsing form data:", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to parse form data"})
 	}
-	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
+
+	// Extract user data
+	name := form.Value["name"][0]
+	surname := form.Value["surname"][0]
+	telegram := form.Value["telegram"][0]
+	discord := form.Value["discord"][0]
+	skills := form.Value["skills"]
+	fmt.Println("Received data:", name, surname, telegram, discord, skills)
 
 	// Get the user ID from the context
 	userID := c.Get("userID").(int64)
 
+	// Handle profile image upload
+	profileImage := form.File["profileImage"]
+	var profileImageURL string
+	if len(profileImage) > 0 {
+		file := profileImage[0]
+		fmt.Println("Received file:", file.Filename)
+
+		src, err := file.Open()
+		if err != nil {
+			fmt.Println("Error opening file:", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to open file"})
+		}
+		defer src.Close()
+
+		// Initialize GCS client
+		ctx := context.Background()
+		client, err := helpers.NewStorageClient(ctx, "C:/Users/krump/Downloads/lucid-volt-424719-f0-5df86076a210.json")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to initialize GCS client"})
+		}
+
+		// Upload the file to GCS
+		objectName := fmt.Sprintf("users/%d/profileImage", userID) // Unique object name based on user ID
+		if err := helpers.UploadFileToGCS(ctx, client, "teamfinderimages", objectName, src); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to upload file to GCS"})
+		}
+
+		// Construct the profile image URL
+		profileImageURL = fmt.Sprintf("https://storage.googleapis.com/teamfinderimages/users/%d/profileImage", userID)
+	}
+
 	// Call the use case to update the user
-	err := u.userUseCase.UpdateUserInfo(userID, input.Name, input.Surname, input.Telegram, input.Discord, input.Skills, input.ProfileImage)
+	err = u.userUseCase.UpdateUserInfo(userID, name, surname, telegram, discord, skills, profileImageURL)
 	if err != nil {
+		fmt.Println("Error updating user info:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
+	fmt.Println("User updated successfully")
 	return c.JSON(http.StatusAccepted, map[string]string{"message": "User updated successfully"})
 }
 

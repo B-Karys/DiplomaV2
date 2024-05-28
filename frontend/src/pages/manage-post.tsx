@@ -138,12 +138,11 @@ export const ManagePost: React.FC = () => {
                     ))}
                 </div>
                 <div className="form-group">
-                    {/* Apply different classes to the buttons */}
                     <button type="button" className="blue-button" onClick={handleSave}>Save</button>
                     <button type="button" className="red-button" onClick={handleDelete} style={{ marginTop: '10px' }}>Delete</button>
                 </div>
             </form>
-            {validationError && <div className="error-message">{validationError}</div>} {/* Display validation error message */}
+            {validationError && <div className="error-message">{validationError}</div>}
         </div>
     );
 };

@@ -2,6 +2,10 @@ package helpers
 
 import (
 	"DiplomaV2/backend/internal/validator"
+	"cloud.google.com/go/storage"
+	"golang.org/x/net/context"
+	"google.golang.org/api/option"
+	"io"
 	"net/url"
 	"strconv"
 	"strings"
@@ -46,4 +50,23 @@ func ReadInt(qs url.Values, key string, defaultValue int, v *validator.Validator
 	}
 	// Otherwise, return the converted integer value.
 	return i
+}
+
+func UploadFileToGCS(ctx context.Context, client *storage.Client, bucketName, objectName string, src io.Reader) error {
+	wc := client.Bucket(bucketName).Object(objectName).NewWriter(ctx)
+	if _, err := io.Copy(wc, src); err != nil {
+		return err
+	}
+	if err := wc.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewStorageClient(ctx context.Context, keyFilePath string) (*storage.Client, error) {
+	client, err := storage.NewClient(ctx, option.WithCredentialsFile(keyFilePath))
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
