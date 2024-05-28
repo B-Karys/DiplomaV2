@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Group, Button } from '@mantine/core';
+import { SetStateAction, useState} from 'react';
+import {TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Group, Button} from '@mantine/core';
 import '@mantine/core/styles.css';
 import classes from './authentication.module.css';
 
@@ -12,29 +12,29 @@ export function Registration() {
     const [passwordError, setPasswordError] = useState('');
     const [generalError, setGeneralError] = useState('');
 
-    const handleEmailChange = (event) => {
+    const handleEmailChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setEmail(event.target.value);
         setEmailError('');
         setGeneralError('');
     };
 
-    const handleNameChange = (event) => {
+    const handleNameChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setName(event.target.value);
         setGeneralError('');
     };
 
-    const handleUsernameChange = (event) => {
+    const handleUsernameChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setUsername(event.target.value);
         setGeneralError('');
     };
 
-    const handlePasswordChange = (event) => {
+    const handlePasswordChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setPassword(event.target.value);
         setPasswordError('');
         setGeneralError('');
     };
 
-    const validateEmail = (email) => {
+    const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };

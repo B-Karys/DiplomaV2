@@ -14,6 +14,7 @@ interface Post {
     skills: string[];
 }
 
+
 export function Home() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -21,21 +22,17 @@ export function Home() {
     const [type, setType] = useState<string>('');
     const [skills, setSkills] = useState<string[]>([]);
     const [sort, setSort] = useState<string>('created_at');
-    const [search, setSearch] = useState<string>('');
 
-    const fetchPosts = async (type: string, skills: string[], sort: string, search: string) => {
+    const fetchPosts = async (type: string, skills: string[], sort: string) => {
         setLoading(true);
         setError(null);
         try {
-            let url = 'http://localhost:4000/v2/posts/';
             const params = new URLSearchParams();
             if (type) params.append('type', type);
             if (skills.length) params.append('skills', skills.join(','));
             if (sort) params.append('sort', sort);
-            if (search) params.append('search', search);
-            url += `?${params.toString()}`;
 
-            const response = await axios.get<Post[]>(url);
+            const response = await axios.get<Post[]>(`http://localhost:4000/v2/posts/?${params.toString()}`);
             setPosts(response.data);
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -49,14 +46,13 @@ export function Home() {
     };
 
     useEffect(() => {
-        fetchPosts(type, skills, sort, search);
-    }, [type, skills, sort, search]);
+        fetchPosts(type, skills, sort);
+    }, [type, skills, sort]);
 
-    const handleFilterChange = (selectedType: string, selectedSkills: string[], selectedSort: string, searchQuery: string) => {
+    const handleFilterChange = (selectedType: string, selectedSkills: string[], selectedSort: string) => {
         setType(selectedType);
         setSkills(selectedSkills);
         setSort(selectedSort);
-        setSearch(searchQuery);
     };
 
     if (loading) return <div>Loading...</div>;
@@ -69,7 +65,6 @@ export function Home() {
                     initialType={type}
                     initialSkills={skills}
                     initialSort={sort}
-                    initialSearch={search}
                     onFilterChange={handleFilterChange}
                 />
             </div>

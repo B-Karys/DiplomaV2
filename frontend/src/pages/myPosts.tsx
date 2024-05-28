@@ -59,7 +59,7 @@ export function MyPosts() {
                             <p>Skills: {post.skills.join(', ')}</p>
                             <p>Created At: {new Date(post.createdAt).toLocaleString()}</p>
                             <Link to={`/manage-post/${post.id}`}>
-                                <button>Manage Post</button>
+                                <button className="blue-button">Manage Post</button>
                             </Link>
                         </div>
                     ))}

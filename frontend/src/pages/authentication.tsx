@@ -39,10 +39,10 @@ export function Authentication() {
             credentials: 'include', // Include cookies in the request
             body: JSON.stringify(userData)
         })
-            .then(response => {
+            .then(async response => {
                 if (response.ok) {
-                    // Set the authenticated flag in local storage
-                    localStorage.setItem('authenticated', 'true');
+                    // Set the authenticated flag in local storage with expiration of 2 minutes
+                    setItemWithExpiration('authenticated', 'true', 23.5 * 60 * 60 * 1000);
 
                     // Redirect to home page after successful login
                     window.location.href = '/';
@@ -56,14 +56,13 @@ export function Authentication() {
                     setErrorMessage('The provided password or email are incorrect');
                     throw new Error('Authentication failed');
                 } else if (response.status === 403) {
-                    return response.json().then(data => {
-                        if (data.message === 'User is not activated') {
-                            setErrorMessage('User is not activated');
-                        } else {
-                            setErrorMessage('User is not activated, please check you mailbox');
-                        }
-                        throw new Error('User is not activated');
-                    });
+                    const data = await response.json();
+                    if (data.message === 'User is not activated') {
+                        setErrorMessage('User is not activated');
+                    } else {
+                        setErrorMessage('User is not activated, please check you mailbox');
+                    }
+                    throw new Error('User is not activated');
                 } else {
                     throw new Error('Unexpected response');
                 }
@@ -73,7 +72,6 @@ export function Authentication() {
                 console.error('Error:', error);
             });
     };
-
 
     const handleCreateAccountClick = () => {
         // Redirect to '/register'
@@ -108,3 +106,14 @@ export function Authentication() {
         </Container>
     );
 }
+
+// Utility functions to set and get items with expiration in local storage
+function setItemWithExpiration(key: string, value: string, ttl: number) {
+    const now = new Date();
+    const item = {
+        value: value,
+        expiry: now.getTime() + ttl,
+    };
+    localStorage.setItem(key, JSON.stringify(item));
+}
+

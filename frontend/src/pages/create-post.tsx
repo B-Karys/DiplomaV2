@@ -3,31 +3,23 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './manage-posts.css'; // Import the CSS file for styling
 
-const CreatePost = () => {
+export const CreatePost = () => {
     const navigate = useNavigate(); // Initialize the navigate function
     const [post, setPost] = useState({
         name: '',
         description: '',
         type: 'team finding',
-        skills: [],
+        skills: [] as string[], // Initialize skills as an array of strings
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        // Handle type separately to ensure it is always updated
-        if (name === 'type') {
-            setPost((prevState) => ({
-                ...prevState,
-                type: value,
-            }));
-        } else {
-            setPost((prevState) => ({
-                ...prevState,
-                [name]: value,
-            }));
-        }
+        setPost((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
     };
 
     const handleCheckboxChange = (skill: string) => {
@@ -41,6 +33,12 @@ const CreatePost = () => {
     };
 
     const handleSave = async () => {
+        // Client-side validation
+        if (!post.name || !post.description) {
+            setError('Name and description are required.');
+            return;
+        }
+
         setLoading(true);
         try {
             await axios.post('http://localhost:4000/v2/posts/', post, {
@@ -91,11 +89,11 @@ const CreatePost = () => {
                     ))}
                 </div>
                 <div className="form-group">
-                    <button type="button" onClick={handleSave} disabled={loading}>
+                    <button type="button" className="blue-button" onClick={handleSave} disabled={loading}>
                         {loading ? 'Saving...' : 'Save'}
                     </button>
                 </div>
-                {error && <div className="error-message">Error: {error}</div>}
+                {error && <div className="error-message">{error}</div>}
             </form>
         </div>
     );

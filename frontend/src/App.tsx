@@ -8,10 +8,10 @@ import { AuthProvider, useAuth } from './context/authContext';
 import { Navbar } from "./components/navbar";
 import { MyPosts } from "./pages/myPosts";
 import { ManagePost } from "./pages/manage-post";
+import  { CreatePost } from "./pages/create-post";
 
 import '@mantine/core/styles.css';
 import "./components/navbar.module.css";
-import CreatePost from "./pages/create-post.tsx";
 
 export default function App() {
     return (
@@ -25,7 +25,7 @@ export default function App() {
                         <Route path="/register" element={<RegistrationRoute />} />
                         <Route path="/profile" element={<ProfileRoute />} />
                         <Route path="/posts" element={<MyPostsRoute />} />
-                        <Route path="/create-post" element={<CreatePostsRoute /> } />
+                        <Route path="/create-post" element={<CreatePostsRoute />} />
                         <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
                     </Routes>
                 </Router>
@@ -34,33 +34,34 @@ export default function App() {
     );
 }
 
+// Custom route components for route protection
+
 const AuthenticationRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <Navigate to="/" /> : <Authentication />;
 };
 
 const RegistrationRoute = () => {
-    const {isAuthenticated} = useAuth();
+    const { isAuthenticated } = useAuth();
     return isAuthenticated ? <Navigate to="/" /> : <Registration />;
-}
+};
 
 const MyPostsRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <MyPosts /> : <Navigate to="/login" />;
-}
+};
 
 const CreatePostsRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <CreatePost /> : <Navigate to="/login" />;
-}
+};
 
 const ManagePostsRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <ManagePost /> : <Navigate to="/login" />;
-}
+};
 
 const ProfileRoute = () => {
     const { isAuthenticated } = useAuth();
-    console.log(isAuthenticated)
     return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />;
 };

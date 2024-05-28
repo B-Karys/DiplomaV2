@@ -47,12 +47,26 @@ button {
     width: 100%;
     padding: 10px;
     border: none;
-    background-color: #007BFF;
     color: white;
     border-radius: 4px;
     cursor: pointer;
 }
 
-button:hover {
+/* Define separate classes for blue and red buttons */
+.blue-button {
+    background-color: #007BFF;
+}
+
+.red-button {
+    background-color: #b14040;
+}
+
+/* Hover effect for blue button */
+.blue-button:hover {
     background-color: #0056b3;
+}
+
+/* Hover effect for red button */
+.red-button:hover {
+    background-color: #8f2d2d;
 }

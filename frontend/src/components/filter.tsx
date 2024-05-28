@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import './filter.module.css'; // Import the CSS file for styling
 
 interface FilterProps {
-    onFilterChange: (type: string, skills: string[], sort: string,) => void;
+    onFilterChange: (type: string, skills: string[], sort: string) => void;
     initialType: string;
     initialSkills: string[];
     initialSort: string;
-    initialSearch: string;
 }
 
-const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSkills, initialSort, }) => {
+const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSkills, initialSort }) => {
     const [type, setType] = useState<string>(initialType);
     const [skills, setSkills] = useState<string[]>(initialSkills);
     const [sortField, setSortField] = useState<string>(initialSort);
+
     const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedType = event.target.value;
         setType(selectedType);
@@ -32,12 +32,10 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
         setSortField(selectedSortField);
     };
 
-
-
     useEffect(() => {
-        // Submit the filters when type, skills, sortField, sortOrder, or search change
-        onFilterChange(type, skills, sortField, );
-    }, [type, skills, sortField, ]);
+        // Submit the filters when type, skills, or sortField change
+        onFilterChange(type, skills, sortField);
+    }, [type, skills, sortField]);
 
     return (
         <div className="filter-container">
@@ -54,51 +52,17 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
             </div>
             <div className="filter-group">
                 Select skills:
-                <label className="checkbox-label">
-                    <input
-                        type="checkbox"
-                        name="javascript"
-                        checked={skills.includes('javascript')}
-                        onChange={handleSkillChange}
-                    />
-                    JavaScript
-                </label>
-                <label className="checkbox-label">
-                    <input
-                        type="checkbox"
-                        name="golang"
-                        checked={skills.includes('golang')}
-                        onChange={handleSkillChange}
-                    />
-                    Golang
-                </label>
-                <label className="checkbox-label">
-                    <input
-                        type="checkbox"
-                        name="python"
-                        checked={skills.includes('python')}
-                        onChange={handleSkillChange}
-                    />
-                    Python
-                </label>
-                <label className="checkbox-label">
-                    <input
-                        type="checkbox"
-                        name="java"
-                        checked={skills.includes('java')}
-                        onChange={handleSkillChange}
-                    />
-                    Java
-                </label>
-                <label className="checkbox-label">
-                    <input
-                        type="checkbox"
-                        name="c++"
-                        checked={skills.includes('c++')}
-                        onChange={handleSkillChange}
-                    />
-                    C++
-                </label>
+                {['javascript', 'golang', 'python', 'java', 'c++'].map(skill => (
+                    <label className="checkbox-label" key={skill}>
+                        <input
+                            type="checkbox"
+                            name={skill}
+                            checked={skills.includes(skill)}
+                            onChange={handleSkillChange}
+                        />
+                        {skill.charAt(0).toUpperCase() + skill.slice(1)}
+                    </label>
+                ))}
             </div>
             <div className="filter-group">
                 <label>

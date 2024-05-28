@@ -25,6 +25,7 @@ export const ManagePost: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null); // State to handle validation error
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -51,17 +52,10 @@ export const ManagePost: React.FC = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         // Handle type separately to ensure it is always updated
-        if (name === 'type') {
-            setPost(prevState => ({
-                ...prevState,
-                type: value,
-            }));
-        } else {
-            setPost(prevState => ({
-                ...prevState,
-                [name]: value,
-            }));
-        }
+        setPost(prevState => ({
+            ...prevState,
+            [name]: value,
+        }));
     };
 
     const handleCheckboxChange = (skill: string) => {
@@ -75,6 +69,14 @@ export const ManagePost: React.FC = () => {
     };
 
     const handleSave = async () => {
+        // Client-side validation
+        if (!post.name || !post.description) {
+            setValidationError('Name and description are required.');
+            return; // Stop execution if validation fails
+        } else {
+            setValidationError(null); // Clear validation error if validation passes
+        }
+
         try {
             await axios.patch(`http://localhost:4000/v2/posts/${id}`, post, {
                 withCredentials: true,
@@ -136,13 +138,14 @@ export const ManagePost: React.FC = () => {
                     ))}
                 </div>
                 <div className="form-group">
-                    <button type="button" onClick={handleSave}>Save</button>
-                    <button type="button" onClick={handleDelete} style={{ backgroundColor: '#b14040', marginTop: '10px' }}>Delete</button>
+                    {/* Apply different classes to the buttons */}
+                    <button type="button" className="blue-button" onClick={handleSave}>Save</button>
+                    <button type="button" className="red-button" onClick={handleDelete} style={{ marginTop: '10px' }}>Delete</button>
                 </div>
             </form>
+            {validationError && <div className="error-message">{validationError}</div>} {/* Display validation error message */}
         </div>
     );
 };
 
 export default ManagePost;
-// b14040
