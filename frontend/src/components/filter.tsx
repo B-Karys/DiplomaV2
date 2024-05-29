@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './filter.module.css'; // Import the CSS file for styling
+import '../styles/filter.module.css'; // Import the CSS file for styling
 
 interface FilterProps {
     onFilterChange: (type: string, skills: string[], sort: string) => void;

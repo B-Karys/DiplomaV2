@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Resizer from 'react-image-file-resizer';
-import './manage-profile.css';
+import '../styles/manage-profile.css';
 
 interface User {
     id: number;

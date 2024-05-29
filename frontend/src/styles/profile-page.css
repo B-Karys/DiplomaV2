@@ -1,7 +1,11 @@
 .profile-container {
     font-family: Arial, sans-serif;
 }
-
+.profile-posts-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Distribute items evenly in each row */
+}
 .profile-header {
     display: flex;
     justify-content: space-between;
@@ -39,7 +43,6 @@
 .profile-photo {
     width: 400px;
     height: 400px;
-    background-color: #ccc;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -53,8 +56,14 @@
     max-height: 100%;
 }
 
-.profile-contacts p {
-    margin: 5px 0;
+.profile-contact-item {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    margin-bottom: 10px; /* Add spacing between contact items */
+}
+
+.profile-contact-item svg {
+    margin-right: 10px; /* Add spacing between icon and text */
 }
 
 .profile-main {
@@ -80,4 +89,28 @@
     text-decoration: none;
     color: #007bff;
 }
+
+.posts-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+.profile-post {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: calc(50% - 20px); /* Adjusted width for two posts per row */
+    box-sizing: border-box; /* Ensure border and padding don't increase width */
+}
+
+/* Clear fix to ensure proper alignment of the last row */
+.posts-container::after {
+    content: "";
+    flex-grow: 9999;
+    min-width: 20px;
+}
+
 

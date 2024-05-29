@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import '@mantine/core/styles.css';
-import './home.css'; // Import the CSS file
 import { Link } from 'react-router-dom'; // Import Link for routing
+import "../styles/my-posts.css"
 
 interface Post {
     id: number;
@@ -45,14 +45,10 @@ export function MyPosts() {
     if (error) return <div>Error loading posts: {error}</div>;
 
     return (
-        <div className="myContainer">
-            {/*<div className="filter-container">*/}
-            {/*    <Filter />*/}
-            {/*</div>*/}
-            <div className="posts-container">
-                <div>
+        <div className="my-myContainer">
+            <div className="my-posts-container">
                     {posts.map(post => (
-                        <div key={post.id} className="post">
+                        <div key={post.id} className="my-post">
                             <h2>{post.name}</h2>
                             <p>{post.description}</p>
                             <p>Type: {post.type}</p>
@@ -64,7 +60,6 @@ export function MyPosts() {
                         </div>
                     ))}
                 </div>
-            </div>
         </div>
     );
 }

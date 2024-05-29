@@ -1,0 +1,22 @@
+.my-myContainer {
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    height: 100vh; /* Use the full viewport height */
+}
+
+.my-posts-container {
+    display: flex;
+    flex-direction: column; /* Stack the posts vertically */
+    align-items: center; /* Center the posts horizontally */
+    width: 70%; /* Set the width to 70% of the viewport */
+    padding: 20px;
+}
+
+.my-post {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 60%;
+}

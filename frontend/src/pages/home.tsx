@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import '@mantine/core/styles.css';
-import './home.css'; // Import the CSS file
+import '../styles/home.css'; // Import the CSS file
 import Filter from '../components/filter.tsx';
 
 interface Post {
@@ -59,7 +59,7 @@ export function Home() {
     if (error) return <div>Error loading posts: {error}</div>;
 
     return (
-        <div className="myContainer">
+        <div className="home-myContainer">
             <div className="filter-container">
                 <Filter
                     initialType={type}
@@ -68,9 +68,9 @@ export function Home() {
                     onFilterChange={handleFilterChange}
                 />
             </div>
-            <div className="posts-container">
+            <div className="home-posts-container">
                 {posts.map(post => (
-                    <div key={post.id} className="post">
+                    <div key={post.id} className="home-post">
                         <h2>{post.name}</h2>
                         <p>{post.description}</p>
                         <p>Author ID: {post.authorId}</p>

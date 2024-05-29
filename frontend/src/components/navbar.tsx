@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Group, rem, useMantineTheme, Burger, Drawer, ScrollArea, Center, Box, UnstyledButton, Collapse, Divider, Menu } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -7,7 +7,7 @@ import {
     IconLogout, IconKey,
     IconSettings, IconUser
 } from '@tabler/icons-react';
-import classes from './navbar.module.css';
+import classes from '../styles/navbar.module.css';
 import { useAuth } from '../context/authContext.tsx'; // Import useAuth from the provider
 
 export function Navbar() {
@@ -15,6 +15,24 @@ export function Navbar() {
     const [menuOpened, setMenuOpened] = useState(false);
     const theme = useMantineTheme();
     const {isAuthenticated, logout} = useAuth(); // Destructure isAuthenticated and logout from context
+    const [, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 0) {
+                setScrolled(true);
+            } else {
+                setScrolled(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
     return (
         <Box pb={60}> {/* Adjusted padding-bottom */}
             <header className={classes.header}>
@@ -83,7 +101,7 @@ export function Navbar() {
                                             <Menu.Item
                                                 leftSection={
                                                     <IconKey style={{width: rem(16), height: rem(16)}}
-                                                                  stroke={1.5}/>
+                                                             stroke={1.5}/>
                                                 }
                                             >
                                                 Change Password
@@ -152,3 +170,4 @@ export function Navbar() {
         </Box>
     );
 }
+

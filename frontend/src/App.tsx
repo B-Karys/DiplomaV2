@@ -11,7 +11,7 @@ import { ManagePost } from "./pages/manage-post";
 import  { CreatePost } from "./pages/create-post";
 
 import '@mantine/core/styles.css';
-import "./components/navbar.module.css";
+import "./styles/navbar.module.css";
 import  {ManageProfile } from "./pages/manage-profile.tsx";
 import  { ChangePassword } from "./pages/change-password.tsx";
 

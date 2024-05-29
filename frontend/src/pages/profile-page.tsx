@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { IconBrandTelegram, IconBrandDiscord } from '@tabler/icons-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import './profile-page.css';
+import '../styles/profile-page.css';
 
 interface User {
     id: number;
@@ -103,18 +103,18 @@ export function ProfilePage() {
                         )}
                     </div>
                     <div className="profile-contacts">
-                        <div className="contact-item">
+                        <div className="profile-contact-item">
                             <IconBrandTelegram size={24} />
                             <p>@{user?.telegram}</p>
                         </div>
-                        <div className="contact-item">
+                        <div className="profile-contact-item">
                             <IconBrandDiscord size={24} />
                             <p>@{user?.discord}</p>
                         </div>
                     </div>
                 </div>
                 <div className="profile-main">
-                    <h1>{user?.name} ({user?.username}) {user?.surname}</h1>
+                    <h2>{user?.name} ({user?.username}) {user?.surname}</h2>
                     <div className="profile-details">
                         <p><strong>Username:</strong> {user?.username}</p>
                         <p><strong>Surname:</strong> {user?.surname}</p>
@@ -127,12 +127,12 @@ export function ProfilePage() {
                         ))}
                     </div>
                     <div className="profile-posts">
-                        <h2>My Posts</h2>
+                        <h2>Author's Posts</h2>
                         {postsLoading && <p>Loading posts...</p>}
                         {postsError && <p>Error loading posts: {postsError}</p>}
-                        <div className="posts-container">
+                        <div className="profile-posts-container">
                             {posts.map(post => (
-                                <div key={post.id} className="post">
+                                <div key={post.id} className="profile-post">
                                     <h3>{post.name}</h3>
                                     <p>{post.description}</p>
                                     <p><strong>Type:</strong> {post.type}</p>

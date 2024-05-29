@@ -1,7 +1,7 @@
 import { SetStateAction, useState} from 'react';
 import {TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Group, Button} from '@mantine/core';
 import '@mantine/core/styles.css';
-import classes from './authentication.module.css';
+import classes from '../styles/authentication.module.css';
 
 export function Registration() {
     const [email, setEmail] = useState('');

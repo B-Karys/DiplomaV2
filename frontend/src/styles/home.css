@@ -1,16 +1,16 @@
-.myContainer {
+.home-myContainer {
     display: flex;
     justify-content: space-between;
     padding: 20px;
     width: 100%;
 }
 
-.posts-container {
+.home-posts-container {
     width: 70%;
     padding-right: 10px;
 }
 
-.post {
+.home-post {
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #ccc;
