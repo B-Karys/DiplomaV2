@@ -4,7 +4,7 @@ import { Container, Paper, Title, TextInput, Button, Text, PasswordInput } from 
 import axios from 'axios';
 
 export const ResetPassword = () => {
-    const [email, setEmail] = useState('');
+    const [email,] = useState('');
     const [token, setToken] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,7 +45,7 @@ export const ResetPassword = () => {
         try {
             await axios.post(
                 'http://localhost:4000/v2/users/reset-password',
-                { email, token, password, confirmPassword }
+                {token, password, confirmPassword }
             );
             setSuccess('Password reset successfully');
         } catch (error) {

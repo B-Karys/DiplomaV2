@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom'; // Import Link for routing
+import Filter from '../components/filter.tsx';
 import '@mantine/core/styles.css';
 import '../styles/home.css'; // Import the CSS file
-import Filter from '../components/filter.tsx';
 
 interface Post {
     id: number;
@@ -13,7 +14,6 @@ interface Post {
     type: string;
     skills: string[];
 }
-
 
 export function Home() {
     const [posts, setPosts] = useState<Post[]>([]);
@@ -73,7 +73,9 @@ export function Home() {
                     <div key={post.id} className="home-post">
                         <h2>{post.name}</h2>
                         <p>{post.description}</p>
-                        <p>Author ID: {post.authorId}</p>
+                        <p>
+                            <Link to={`/profile/${post.authorId}`}>Author</Link>
+                        </p>
                         <p>Type: {post.type}</p>
                         <p>Skills: {post.skills.join(', ')}</p>
                         <p>Created At: {new Date(post.createdAt).toLocaleDateString()}</p>

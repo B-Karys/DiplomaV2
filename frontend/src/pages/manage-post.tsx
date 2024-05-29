@@ -130,7 +130,7 @@ export const ManagePost: React.FC = () => {
                 </div>
                 <div className="form-group">
                     <label>Skills:</label>
-                    {['golang', 'python', 'java', 'javascript'].map(skill => (
+                    {['golang', 'python', 'java', 'javascript', 'c++', 'c#', 'php', 'rust'].map(skill => (
                         <label key={skill} className="checkbox-label">
                             <input type="checkbox" name="skills" value={skill} checked={post.skills.includes(skill)} onChange={() => handleCheckboxChange(skill)} />
                             {skill}

@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Group, rem, useMantineTheme, Burger, Drawer, ScrollArea, Center, Box, UnstyledButton, Collapse, Divider, Menu } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
     IconChevronDown,
     IconLogout, IconKey,
-    IconSettings, IconUser
+    IconSettings, IconUser, IconTrash,
 } from '@tabler/icons-react';
 import classes from '../styles/navbar.module.css';
 import { useAuth } from '../context/authContext.tsx'; // Import useAuth from the provider
+import axios from 'axios';
 
 export function Navbar() {
     const [drawerOpened, {toggle: toggleDrawer, close: closeDrawer}] = useDisclosure(false);
@@ -32,6 +33,17 @@ export function Navbar() {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
+
+    const handleDeleteAccount = async () => {
+        try {
+            await axios.delete('http://localhost:4000/v2/users/', {
+                withCredentials: true,
+            });
+            logout();
+        } catch (error) {
+            console.error('Error deleting account:', error);
+        }
+    };
 
     return (
         <Box pb={60}> {/* Adjusted padding-bottom */}
@@ -78,7 +90,7 @@ export function Navbar() {
                                         </UnstyledButton>
                                     </Menu.Target>
                                     <Menu.Dropdown className={classes.menuDropdown}>
-                                        <Link to="/profile" className={classes.dropdownSubLink}>
+                                        <Link to="/profile/my" className={classes.dropdownSubLink}>
                                             <Menu.Item
                                                 leftSection={
                                                     <IconUser style={{width: rem(16), height: rem(16)}} stroke={1.5}/>
@@ -116,6 +128,18 @@ export function Navbar() {
                                         >
                                             Logout
                                         </Menu.Item>
+
+                                        <Menu.Divider />
+
+                                        <Menu.Item
+                                            leftSection={
+                                                <IconTrash style={{width: rem(16), height: rem(16)}} stroke={1.5}/>
+                                            }
+                                            color="red" // Add red color here
+                                            onClick={handleDeleteAccount} // Add delete account handler
+                                        >
+                                            Delete Account
+                                        </Menu.Item>
                                     </Menu.Dropdown>
                                 </Menu>
                             </>
@@ -152,7 +176,7 @@ export function Navbar() {
                         {isAuthenticated && (
                             <>
                                 <Link to="/posts" className={classes.link}>My Posts</Link>
-                                <Link to="/profile" className={classes.link}>My Profile</Link>
+                                <Link to="/profile/my" className={classes.link}>My Profile</Link>
                             </>
                         )}
                     </Collapse>
@@ -170,4 +194,3 @@ export function Navbar() {
         </Box>
     );
 }
-

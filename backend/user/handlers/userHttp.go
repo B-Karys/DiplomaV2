@@ -17,10 +17,11 @@ import (
 )
 
 var (
-	ErrFailedValidation = errors.New("validation error")
-	ErrWrongCredentials = errors.New("wrong Credentials")
-	ErrWrongPassword    = errors.New("wrong Password")
-	ErrNotActive        = errors.New("user is not activated")
+	ErrFailedValidation         = errors.New("validation error")
+	ErrPasswordFailedValidation = errors.New("Password validation error")
+	ErrWrongCredentials         = errors.New("wrong Credentials")
+	ErrWrongPassword            = errors.New("wrong Password")
+	ErrNotActive                = errors.New("user is not activated")
 )
 
 type userHttpHandler struct {
@@ -181,9 +182,9 @@ token, err := u.userUseCase.Registration(user)
 
 func (u *userHttpHandler) ResetPassword(c echo.Context) error {
 	var input struct {
-		Token               string `json:"token"`
-		NewPassword         string `json:"newPassword"`
-		NewPasswordRepeated string `json:"newPasswordRepeated"`
+		Token           string `json:"token"`
+		NewPassword     string `json:"password"`
+		ConfirmPassword string `json:"confirmPassword"`
 	}
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
@@ -191,11 +192,15 @@ func (u *userHttpHandler) ResetPassword(c echo.Context) error {
 
 	v := validator.New()
 	if validator.ValidateTokenPlaintext(v, input.Token); !v.Valid() {
-		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if input.NewPassword != input.NewPasswordRepeated {
-		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	if input.NewPassword != input.ConfirmPassword {
+		return c.JSON(http.StatusBadRequest, ErrPasswordFailedValidation.Error())
+	}
+
+	if validator.ValidatePasswordPlaintext(v, input.NewPassword); !v.Valid() {
+		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
 	err := u.userUseCase.ResetPassword(input.Token, input.NewPassword)
@@ -380,19 +385,11 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 }
 
 func (u *userHttpHandler) DeleteUser(c echo.Context) error {
-	// Get the user ID from the URL
-	userID, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
-	}
 
 	contextUser := c.Get("userID").(int64)
-	if contextUser != userID {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Current user is not the user in the parameter"})
-	}
 
 	// Call the repository method to delete the user
-	err = u.userUseCase.DeleteUser(userID)
+	err := u.userUseCase.DeleteUser(contextUser)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete user"})
 	}

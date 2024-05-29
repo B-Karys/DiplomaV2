@@ -10,7 +10,7 @@ type Post struct {
 	CreatedAt   time.Time      `gorm:"not null;default:current_timestamp" json:"createdAt" `
 	Name        string         `gorm:"not null" json:"name"`
 	Description string         `gorm:"" json:"description"`
-	AuthorID    int64          `gorm:"not null" json:"authorId"`
+	AuthorID    int64          `gorm:"not null, foreignKey:users_id" json:"authorId"`
 	Type        string         `gorm:"not null" json:"type"`
 	Skills      pq.StringArray `gorm:"type:text[];" json:"skills"`
 	Version     int            `gorm:"not null; default:1" json:"-"`

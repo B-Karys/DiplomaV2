@@ -130,7 +130,7 @@ export const ManageProfile: React.FC = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            navigate('/profile');
+            navigate('/profile/my');
         } catch (error) {
             console.error('Error updating user:', error);
         }
@@ -169,7 +169,7 @@ export const ManageProfile: React.FC = () => {
                 </div>
                 <div className="form-group">
                     <label>Skills:</label>
-                    {['golang', 'python', 'java', 'javascript'].map(skill => (
+                    {['golang', 'python', 'java', 'javascript', 'c++', 'c#', 'php', 'rust'].map(skill => (
                         <label key={skill} className="checkbox-label">
                             <input
                                 type="checkbox"

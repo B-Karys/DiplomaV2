@@ -1,7 +1,8 @@
+import { Container, Paper, TextInput, PasswordInput, Title, Text, Button } from '@mantine/core';
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import classes from "../styles/authentication.module.css"
 export function ChangePassword() {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -9,9 +10,6 @@ export function ChangePassword() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showRepeatNewPass, setShowRepeatNewPass] = useState(false);
     const navigate = useNavigate();
 
     const handleChangePassword = async (e: React.FormEvent) => {
@@ -52,75 +50,43 @@ export function ChangePassword() {
     };
 
     return (
-        <div className="profile-container">
-            <div className="profile-content">
-                <form onSubmit={handleChangePassword} className="change-password-form">
-                    <h2>Change Password</h2>
-                    {error && <p className="error">{error}</p>}
-                    {success && <p className="success">{success}</p>}
-                    <div className="form-group">
-                        <label htmlFor="currentPassword">Current Password</label>
-                        <div className="password-input-container">
-                            <input
-                                type={showCurrentPassword ? "text" : "password"}
-                                id="currentPassword"
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                required
-                            />
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={showCurrentPassword}
-                                    onChange={() => setShowCurrentPassword(!showCurrentPassword)}
-                                /> Show Password
-                            </label>
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="newPassword">New Password</label>
-                        <div className="password-input-container">
-                            <input
-                                type={showNewPassword ? "text" : "password"}
-                                id="newPassword"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                required
-                            />
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={showNewPassword}
-                                    onChange={() => setShowNewPassword(!showNewPassword)}
-                                /> Show Password
-                            </label>
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="repeatNewPass">Repeat New Password</label>
-                        <div className="password-input-container">
-                            <input
-                                type={showRepeatNewPass ? "text" : "password"}
-                                id="repeatNewPass"
-                                value={repeatNewPass}
-                                onChange={(e) => setRepeatNewPass(e.target.value)}
-                                required
-                            />
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={showRepeatNewPass}
-                                    onChange={() => setShowRepeatNewPass(!showRepeatNewPass)}
-                                /> Show Password
-                            </label>
-                        </div>
-                    </div>
-                    <button type="submit" className="blue-button" disabled={loading}>
+        <Container size={420} my={40}>
+            <Title ta="center" className={classes.cpTitle}>Change Password</Title>
+            <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+                <form onSubmit={handleChangePassword}>
+                    <TextInput
+                        type={"password"}
+                        label="Current Password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                    />
+                    <PasswordInput
+                        label="New Password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                    />
+                    <PasswordInput
+                        label="Repeat New Password"
+                        value={repeatNewPass}
+                        onChange={(e) => setRepeatNewPass(e.target.value)}
+                        required
+                    />
+                    {error && <Text color="red" mt={2}>{error}</Text>}
+                    {success && <Text color="green" mt={2}>{success}</Text>}
+                    <Button
+                        type="submit"
+                        variant="outline"
+                        loading={loading}
+                        mt={4}
+                        fullWidth
+                    >
                         {loading ? 'Changing...' : 'Change Password'}
-                    </button>
+                    </Button>
                 </form>
-            </div>
-        </div>
+            </Paper>
+        </Container>
     );
 }
 

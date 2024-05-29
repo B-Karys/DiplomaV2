@@ -26,11 +26,7 @@ interface Post {
     skills: string[];
 }
 
-interface ProfilePageProps {
-    userId: number; // Prop to accept user ID
-}
-
-export function ProfilePage({ userId }: ProfilePageProps) {
+export function MyProfilePage() {
     const [user, setUser] = useState<User | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -41,11 +37,11 @@ export function ProfilePage({ userId }: ProfilePageProps) {
     useEffect(() => {
         fetchUserData();
         fetchUserPosts();
-    }, [userId]); // Fetch data whenever userId changes
+    }, []);
 
     const fetchUserData = async () => {
         try {
-            const response = await fetch(`http://localhost:4000/v2/users/${userId}`, {
+            const response = await fetch('http://localhost:4000/v2/users/my', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,7 +67,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
         setPostsLoading(true);
         setPostsError(null);
         try {
-            const response = await axios.get<Post[]>(`http://localhost:4000/v2/posts/?author=${userId}`, {
+            const response = await axios.get<Post[]>('http://localhost:4000/v2/posts/my', {
                 withCredentials: true,
             });
             setPosts(response.data);
@@ -133,7 +129,6 @@ export function ProfilePage({ userId }: ProfilePageProps) {
                         <h2>Author's Posts</h2>
                         {postsLoading && <p>Loading posts...</p>}
                         {postsError && <p>Error loading posts: {postsError}</p>}
-                        {posts && Array.isArray(posts) && (
                         <div className="profile-posts-container">
                             {posts.map(post => (
                                 <div key={post.id} className="profile-post">
@@ -145,7 +140,6 @@ export function ProfilePage({ userId }: ProfilePageProps) {
                                 </div>
                             ))}
                         </div>
-                            )}
                     </div>
                 </div>
             </div>
@@ -153,4 +147,4 @@ export function ProfilePage({ userId }: ProfilePageProps) {
     );
 }
 
-export default ProfilePage;
+export default MyProfilePage;
