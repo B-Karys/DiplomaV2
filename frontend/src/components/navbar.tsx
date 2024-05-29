@@ -4,7 +4,7 @@ import { Button, Group, rem, useMantineTheme, Burger, Drawer, ScrollArea, Center
 import { useDisclosure } from '@mantine/hooks';
 import {
     IconChevronDown,
-    IconHeart, IconLogout,
+    IconLogout, IconKey,
     IconSettings, IconUser
 } from '@tabler/icons-react';
 import classes from './navbar.module.css';
@@ -60,21 +60,6 @@ export function Navbar() {
                                         </UnstyledButton>
                                     </Menu.Target>
                                     <Menu.Dropdown className={classes.menuDropdown}>
-                                        <Link to="/posts" className={classes.dropdownSubLink} color={"red"}>
-                                            <Menu.Item
-                                                className={`${classes.dropdownSubLink} ${classes.menuItemRed}`}
-                                                leftSection={
-                                                    <IconHeart
-                                                        style={{width: rem(16), height: rem(16)}}
-                                                        color={theme.colors.red[6]}
-                                                        stroke={1.5}
-                                                    />
-                                                }
-                                            >
-                                                Liked posts
-                                            </Menu.Item>
-                                        </Link>
-                                        <Menu.Divider/>
                                         <Link to="/profile" className={classes.dropdownSubLink}>
                                             <Menu.Item
                                                 leftSection={
@@ -91,9 +76,20 @@ export function Navbar() {
                                                                   stroke={1.5}/>
                                                 }
                                             >
-                                                Manage Account
+                                                Manage Profile
                                             </Menu.Item>
                                         </Link>
+                                        <Link to="/profile/change-password">
+                                            <Menu.Item
+                                                leftSection={
+                                                    <IconKey style={{width: rem(16), height: rem(16)}}
+                                                                  stroke={1.5}/>
+                                                }
+                                            >
+                                                Change Password
+                                            </Menu.Item>
+                                        </Link>
+
                                         <Menu.Item
                                             leftSection={
                                                 <IconLogout style={{width: rem(16), height: rem(16)}} stroke={1.5}/>

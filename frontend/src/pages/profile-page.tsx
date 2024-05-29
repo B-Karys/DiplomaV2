@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { IconBrandTelegram, IconBrandDiscord } from '@tabler/icons-react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './profile-page.css';
 
 interface User {
@@ -12,16 +15,29 @@ interface User {
     email: string;
     skills: string[] | null;
     activated: boolean;
-    profileImage: string; // Change to the GCS URL
+    profileImage: string;
+}
+
+interface Post {
+    id: number;
+    createdAt: string;
+    name: string;
+    description: string;
+    type: string;
+    skills: string[];
 }
 
 export function ProfilePage() {
     const [user, setUser] = useState<User | null>(null);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [postsLoading, setPostsLoading] = useState<boolean>(true);
+    const [postsError, setPostsError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchUserData();
+        fetchUserPosts();
     }, []);
 
     const fetchUserData = async () => {
@@ -31,7 +47,7 @@ export function ProfilePage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // Ensure cookies are included in the request
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -45,6 +61,25 @@ export function ProfilePage() {
             setError((error as Error).message);
             setLoading(false);
             console.error('Error fetching user data:', error);
+        }
+    };
+
+    const fetchUserPosts = async () => {
+        setPostsLoading(true);
+        setPostsError(null);
+        try {
+            const response = await axios.get<Post[]>('http://localhost:4000/v2/posts/my', {
+                withCredentials: true,
+            });
+            setPosts(response.data);
+            setPostsLoading(false);
+        } catch (error) {
+            setPostsLoading(false);
+            if (axios.isAxiosError(error)) {
+                setPostsError(error.message);
+            } else {
+                setPostsError('An unknown error occurred');
+            }
         }
     };
 
@@ -62,27 +97,50 @@ export function ProfilePage() {
                 <div className="profile-sidebar">
                     <div className="profile-photo">
                         {user?.profileImage ? (
-                            <img src={user.profileImage} alt="Profile" /> // Update to use the GCS URL
+                            <img src={user.profileImage} alt="Profile" />
                         ) : (
                             'Profile Photo Of User'
                         )}
                     </div>
                     <div className="profile-contacts">
-                        <p>@{user?.telegram}</p>
-                        <p>@{user?.discord}</p>
+                        <div className="contact-item">
+                            <IconBrandTelegram size={24} />
+                            <p>@{user?.telegram}</p>
+                        </div>
+                        <div className="contact-item">
+                            <IconBrandDiscord size={24} />
+                            <p>@{user?.discord}</p>
+                        </div>
                     </div>
                 </div>
                 <div className="profile-main">
                     <h1>{user?.name} ({user?.username}) {user?.surname}</h1>
-                    <p>{user?.activated ? 'Active' : 'Inactive'} user interested in various technologies and projects.</p>
+                    <div className="profile-details">
+                        <p><strong>Username:</strong> {user?.username}</p>
+                        <p><strong>Surname:</strong> {user?.surname}</p>
+                        <p><strong>Name:</strong> {user?.name}</p>
+                    </div>
                     <div className="profile-skills">
+                        <p><strong>Skills:</strong></p>
                         {user?.skills?.map((skill, index) => (
                             <p key={index}>{skill}</p>
                         ))}
                     </div>
-                    <div className="profile-team">
-                        <h2>Team Name</h2>
-                        <p>Team Description</p>
+                    <div className="profile-posts">
+                        <h2>My Posts</h2>
+                        {postsLoading && <p>Loading posts...</p>}
+                        {postsError && <p>Error loading posts: {postsError}</p>}
+                        <div className="posts-container">
+                            {posts.map(post => (
+                                <div key={post.id} className="post">
+                                    <h3>{post.name}</h3>
+                                    <p>{post.description}</p>
+                                    <p><strong>Type:</strong> {post.type}</p>
+                                    <p><strong>Skills:</strong> {post.skills.join(', ')}</p>
+                                    <p><strong>Created At:</strong> {new Date(post.createdAt).toLocaleString()}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

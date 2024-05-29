@@ -13,6 +13,7 @@ import  { CreatePost } from "./pages/create-post";
 import '@mantine/core/styles.css';
 import "./components/navbar.module.css";
 import  {ManageProfile } from "./pages/manage-profile.tsx";
+import  { ChangePassword } from "./pages/change-password.tsx";
 
 export default function App() {
     return (
@@ -29,6 +30,7 @@ export default function App() {
                         <Route path="/posts" element={<MyPostsRoute />} />
                         <Route path="/create-post" element={<CreatePostsRoute />} />
                         <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
+                        <Route path="/profile/change-password" element={<ChangePasswordRoute />} />
                     </Routes>
                 </Router>
             </AuthProvider>
@@ -71,5 +73,10 @@ const ProfileRoute = () => {
 const ManageProfileRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <ManageProfile /> : <Navigate to="/login" />;
+};
+
+const ChangePasswordRoute = () => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <ChangePassword /> : <Navigate to="/login"/>;
 };
 

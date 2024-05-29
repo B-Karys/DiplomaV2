@@ -22,7 +22,7 @@ export const ManageProfile: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [profileImage, setProfileImage] = useState<File | null>(null);
-    const [resizedProfileImage, setResizedProfileImage] = useState<string | null>(null);
+    const [setResizedProfileImage] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -35,7 +35,6 @@ export const ManageProfile: React.FC = () => {
                 withCredentials: true,
             });
 
-            // Parse skills string into an array
             const skillsArray = response.data.skills ? response.data.skills[0].split(',').filter(skill => skill) : [];
 
             setUser({ ...response.data, skills: skillsArray });
@@ -80,10 +79,7 @@ export const ManageProfile: React.FC = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setUser(prevUser => ({
-            ...prevUser!,
-            [name]: value,
-        }));
+        setUser(prevUser => prevUser ? { ...prevUser, [name]: value } : null);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,9 +109,9 @@ export const ManageProfile: React.FC = () => {
         if (!user || !user.name || !user.surname) {
             setValidationError('Name and surname are required.');
             return;
-        } else {
-            setValidationError(null);
         }
+
+        setValidationError(null);
 
         const formData = new FormData();
         formData.append('name', user.name);
@@ -175,7 +171,13 @@ export const ManageProfile: React.FC = () => {
                     <label>Skills:</label>
                     {['golang', 'python', 'java', 'javascript'].map(skill => (
                         <label key={skill} className="checkbox-label">
-                            <input type="checkbox" name="skills" value={skill} checked={user?.skills?.includes(skill) || false} onChange={() => handleCheckboxChange(skill)} />
+                            <input
+                                type="checkbox"
+                                name="skills"
+                                value={skill}
+                                checked={user?.skills?.includes(skill) || false}
+                                onChange={() => handleCheckboxChange(skill)}
+                            />
                             {skill}
                         </label>
                     ))}
