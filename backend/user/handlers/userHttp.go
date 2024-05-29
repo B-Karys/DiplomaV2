@@ -143,11 +143,13 @@ func (u *userHttpHandler) ForgotPassword(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
+	forgotPasswordLink := fmt.Sprintf("http://localhost:5173/reset-password/%s", token)
 
 	// Send the password reset email in the background
 	u.background(func() error {
 		data := map[string]any{
 			"passwordResetToken": token,
+			"forgotPasswordLink": forgotPasswordLink,
 		}
 		return u.mailer.Send(input.Email, "token_password_reset.tmpl", data)
 	})
@@ -156,10 +158,32 @@ func (u *userHttpHandler) ForgotPassword(c echo.Context) error {
 	//Todo with frontend
 }
 
+/*
+token, err := u.userUseCase.Registration(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	activationLink := fmt.Sprintf("http://localhost:4000/v2/users/activate/%s", token.Plaintext)
+
+	u.background(func() error {
+		data := map[string]interface{}{
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
+			"activationLink":  activationLink,
+		}
+		return u.mailer.Send(user.Email, "user_welcome.tmpl", data)
+	})
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{"user": user})
+}
+*/
+
 func (u *userHttpHandler) ResetPassword(c echo.Context) error {
 	var input struct {
-		Token       string `json:"token"`
-		NewPassword string `json:"newPassword"`
+		Token               string `json:"token"`
+		NewPassword         string `json:"newPassword"`
+		NewPasswordRepeated string `json:"newPasswordRepeated"`
 	}
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
@@ -167,6 +191,10 @@ func (u *userHttpHandler) ResetPassword(c echo.Context) error {
 
 	v := validator.New()
 	if validator.ValidateTokenPlaintext(v, input.Token); !v.Valid() {
+		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
+	}
+
+	if input.NewPassword != input.NewPasswordRepeated {
 		return c.JSON(http.StatusBadRequest, ErrFailedValidation.Error())
 	}
 

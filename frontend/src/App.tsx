@@ -12,8 +12,10 @@ import  { CreatePost } from "./pages/create-post";
 
 import '@mantine/core/styles.css';
 import "./styles/navbar.module.css";
-import  {ManageProfile } from "./pages/manage-profile.tsx";
+import  { ManageProfile } from "./pages/manage-profile.tsx";
 import  { ChangePassword } from "./pages/change-password.tsx";
+import  { ForgotPassword } from "./pages/forgot-password.tsx";
+import  { ResetPassword } from "./pages/reset-password.tsx";
 
 export default function App() {
     return (
@@ -31,6 +33,8 @@ export default function App() {
                         <Route path="/create-post" element={<CreatePostsRoute />} />
                         <Route path="/manage-post/:id" element={<ManagePostsRoute />} />
                         <Route path="/profile/change-password" element={<ChangePasswordRoute />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordRoute />} />
+                        <Route path="/reset-password/:token" element={<ResetPasswordRoute />} />
                     </Routes>
                 </Router>
             </AuthProvider>
@@ -80,3 +84,10 @@ const ChangePasswordRoute = () => {
     return isAuthenticated ? <ChangePassword /> : <Navigate to="/login"/>;
 };
 
+const ForgotPasswordRoute = () => {
+    return <ForgotPassword />
+}
+
+const ResetPasswordRoute = () => {
+    return <ResetPassword />
+}

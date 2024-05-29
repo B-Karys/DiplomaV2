@@ -1,7 +1,7 @@
-import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Group, Button } from '@mantine/core';
-import '@mantine/core/styles.css';
+import { TextInput, PasswordInput, Paper, Title, Text, Container, Group, Button } from '@mantine/core';
+import { Link } from 'react-router-dom';
 import classes from '../styles/authentication.module.css';
-import { SetStateAction, useState} from "react";
+import { SetStateAction, useState} from 'react';
 
 export function Authentication() {
     const [email, setEmail] = useState('');
@@ -73,11 +73,6 @@ export function Authentication() {
             });
     };
 
-    const handleCreateAccountClick = () => {
-        // Redirect to '/register'
-        window.location.href = '/register';
-    };
-
     return (
         <Container size={420} my={40}>
             <Title ta="center" className={classes.title}>
@@ -85,19 +80,26 @@ export function Authentication() {
             </Title>
             <Text c="dimmed" size="sm" ta="center" mt={5}>
                 Do not have an account yet?{' '}
-                <Anchor size="sm" component="button" onClick={handleCreateAccountClick}>
+                <Link to="/register" className={`${classes.createAccount} ${classes.blueText}`}>
                     Create account
-                </Anchor>
+                </Link>
             </Text>
 
             <Paper withBorder shadow="md" p={30} mt={30} radius="md">
                 <TextInput label="Email" placeholder="example@mail.ru" value={email} onChange={handleEmailChange} required />
-                {errorMessage && <Text c="red" size="sm">{errorMessage}</Text>}
-                <PasswordInput label="Password" placeholder="Your password" value={password} onChange={handlePasswordChange} required mt="md" />
+                {errorMessage && <Text className={classes.error}>{errorMessage}</Text>}
+                <PasswordInput
+                    label="Password"
+                    placeholder="Your password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    required
+                    mt="md"
+                />
                 <Group justify="space-between" mt="lg">
-                    <Anchor component="button" size="sm">
+                    <Link to="/forgot-password" className={`${classes.forgotPassword} ${classes.blueText}`}>
                         Forgot password?
-                    </Anchor>
+                    </Link>
                 </Group>
                 <Button fullWidth mt="xl" onClick={handleSubmit}>
                     Sign in
@@ -107,6 +109,8 @@ export function Authentication() {
     );
 }
 
+
+export default Authentication;
 // Utility functions to set and get items with expiration in local storage
 function setItemWithExpiration(key: string, value: string, ttl: number) {
     const now = new Date();

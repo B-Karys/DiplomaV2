@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import axios from 'axios';
-import '../styles/profile-page.css';
 import { useNavigate } from 'react-router-dom';
 
 export function ChangePassword() {

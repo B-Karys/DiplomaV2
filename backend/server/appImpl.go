@@ -33,7 +33,7 @@ type echoServer struct {
 func NewEchoServer(conf *config.Config, db database.Database) Server {
 	echoApp := echo.New()
 	echoApp.Logger.SetLevel(log.DEBUG)
-	appMailer := mailer.New("sandbox.smtp.mailtrap.io", 25, "6f71a6ef2443f6", "57f94aefae5b38", "Test <no-reply@test.com>")
+	appMailer := mailer.New("sandbox.smtp.mailtrap.io", 25, "9db29c5c14f3de", "653000f2303478", "Test <no-reply@test.com>")
 
 	return &echoServer{
 		app:    echoApp,

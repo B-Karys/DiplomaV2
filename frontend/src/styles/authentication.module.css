@@ -1,6 +1,20 @@
 .title {
-    font-family:
-            Greycliff CF,
-            var(--mantine-font-family);
-    font-weight: 900;
+    text-align: center;
+}
+
+.error {
+    color: red;
+}
+
+.passwordInput {
+    border: none; /* Remove border */
+}
+
+.blueText {
+    color: #4dabf7;
+    text-decoration: underline;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    background: none;
 }
