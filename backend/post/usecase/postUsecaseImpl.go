@@ -1,7 +1,8 @@
 package usecase
 
 import (
-	"DiplomaV2/backend/post/models"
+	"DiplomaV2/backend/internal/entity"
+	"DiplomaV2/backend/post/filters"
 	"DiplomaV2/backend/post/repository"
 	"github.com/pkg/errors"
 )
@@ -20,7 +21,7 @@ func NewPostUseCase(repository repository.PostRepository) PostUseCase {
 	}
 }
 
-func (p *postUseCaseImpl) GetPostById(id int64) (*models.Post, error) {
+func (p *postUseCaseImpl) GetPostById(id int64) (*entity.Post, error) {
 	post, err := p.Repo.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func (p *postUseCaseImpl) GetPostById(id int64) (*models.Post, error) {
 	return post, nil
 }
 
-func (p *postUseCaseImpl) CreatePost(post *models.Post) error {
+func (p *postUseCaseImpl) CreatePost(post *entity.Post) error {
 	err := p.Repo.Insert(post)
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func (p *postUseCaseImpl) UpdatePost(postID, userID int64, name string, descript
 	return err
 }
 
-func (p *postUseCaseImpl) GetFilteredPosts(name, description, author, postType string, skills []string, filters models.Filters) ([]*models.Post, error) {
+func (p *postUseCaseImpl) GetFilteredPosts(name, description, author, postType string, skills []string, filters filters.Filters) ([]*entity.Post, error) {
 	filteredPosts, err := p.Repo.GetFilteredPosts(name, description, author, postType, skills, filters)
 	if err != nil {
 		return nil, err

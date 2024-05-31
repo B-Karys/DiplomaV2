@@ -2,7 +2,8 @@ package repository
 
 import (
 	"DiplomaV2/backend/internal/database"
-	"DiplomaV2/backend/post/models"
+	"DiplomaV2/backend/internal/entity"
+	"DiplomaV2/backend/post/filters"
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -17,13 +18,13 @@ func NewPostRepository(db database.Database) PostRepository {
 	return &postRepository{DB: db}
 }
 
-func (m *postRepository) Insert(post *models.Post) error {
+func (m *postRepository) Insert(post *entity.Post) error {
 	result := m.DB.GetDb().Create(post)
 	return result.Error
 }
 
-func (m *postRepository) GetByID(postID int64) (*models.Post, error) {
-	var post models.Post
+func (m *postRepository) GetByID(postID int64) (*entity.Post, error) {
+	var post entity.Post
 	if err := m.DB.GetDb().Where("id = ?", postID).First(&post).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("post not found")
@@ -38,7 +39,7 @@ func (m *postRepository) Delete(id int64) error {
 		return gorm.ErrRecordNotFound
 	}
 
-	result := m.DB.GetDb().Delete(&models.Post{}, id)
+	result := m.DB.GetDb().Delete(&entity.Post{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -50,9 +51,8 @@ func (m *postRepository) Delete(id int64) error {
 	return nil
 }
 
-func (m *postRepository) Update(post *models.Post) error {
+func (m *postRepository) Update(post *entity.Post) error {
 	result := m.DB.GetDb().Save(post)
-	// Check for errors
 	if result.Error != nil {
 		return result.Error
 	}
@@ -64,7 +64,7 @@ func (m *postRepository) DeleteAllForUser(userID int64) error {
 		return gorm.ErrRecordNotFound
 	}
 
-	result := m.DB.GetDb().Where("author_id = ?", userID).Delete(&models.Post{})
+	result := m.DB.GetDb().Where("author_id = ?", userID).Delete(&entity.Post{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -72,11 +72,10 @@ func (m *postRepository) DeleteAllForUser(userID int64) error {
 	return nil
 }
 
-func (m *postRepository) GetFilteredPosts(name, description, author, postType string, skills []string, filters models.Filters) ([]*models.Post, error) {
-	var posts []*models.Post
-	query := m.DB.GetDb().Model(&models.Post{})
+func (m *postRepository) GetFilteredPosts(name, description, author, postType string, skills []string, filters filters.Filters) ([]*entity.Post, error) {
+	var posts []*entity.Post
+	query := m.DB.GetDb().Model(&entity.Post{})
 
-	// Apply filters
 	if name != "" {
 		query = query.Where("name ILIKE ?", "%"+name+"%")
 	}
@@ -93,12 +92,10 @@ func (m *postRepository) GetFilteredPosts(name, description, author, postType st
 		query = query.Where("skills @> ?", pq.Array(skills))
 	}
 
-	// Apply sorting
 	if filters.Sort != "" && contains(filters.SortSafeList, filters.Sort) {
 		query = query.Order(fmt.Sprintf("%s %s", filters.SortColumn(), filters.SortDirection()))
 	}
 
-	// Apply pagination
 	query = query.Offset((filters.Page - 1) * filters.PageSize).Limit(filters.PageSize)
 
 	if err := query.Find(&posts).Error; err != nil {

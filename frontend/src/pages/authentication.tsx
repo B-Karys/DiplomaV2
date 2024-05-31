@@ -111,7 +111,7 @@ export function Authentication() {
 
 
 export default Authentication;
-// Utility functions to set and get items with expiration in local storage
+
 function setItemWithExpiration(key: string, value: string, ttl: number) {
     const now = new Date();
     const item = {

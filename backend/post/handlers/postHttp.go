@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"DiplomaV2/backend/internal/entity"
 	"DiplomaV2/backend/internal/helpers"
 	"DiplomaV2/backend/internal/validator"
-	"DiplomaV2/backend/post/models"
+	"DiplomaV2/backend/post/filters"
 	"DiplomaV2/backend/post/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -24,22 +25,18 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 		Description string
 		PostType    string
 		Skills      []string
-		models.Filters
+		filters.Filters
 	}
 
 	v := validator.New()
 
 	qs := c.Request().URL.Query()
 
-	//Search by words
 	input.Name = helpers.ReadString(qs, "name", "")
 	input.Description = helpers.ReadString(qs, "description", "")
 
-	//Show only one type
 	input.PostType = helpers.ReadString(qs, "type", "")
 
-	//Show the posts of certain author: will be needed for certain author profiles
-	//Show only by chosen skills
 	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
 
 	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
@@ -51,7 +48,7 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if models.ValidateFilters(v, input.Filters); !v.Valid() {
+	if filters.ValidateFilters(v, input.Filters); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
@@ -70,24 +67,20 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 		Author      string
 		PostType    string
 		Skills      []string
-		models.Filters
+		filters.Filters
 	}
 
 	v := validator.New()
 
 	qs := c.Request().URL.Query()
 
-	//Search by words
 	input.Name = helpers.ReadString(qs, "name", "")
 	input.Description = helpers.ReadString(qs, "description", "")
 
-	//Show only one type
 	input.PostType = helpers.ReadString(qs, "type", "")
 
-	//Show the posts of certain author: will be needed for certain author profiles
 	input.Author = helpers.ReadString(qs, "author", "")
 
-	//Show only by chosen skills
 	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
 
 	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
@@ -99,7 +92,7 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if models.ValidateFilters(v, input.Filters); !v.Valid() {
+	if filters.ValidateFilters(v, input.Filters); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
@@ -149,7 +142,7 @@ func (p *postHttpHandler) GetPostById(c echo.Context) error {
 func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	userID := c.Get("userID").(int64)
 
-	var input struct { //future: grpc message
+	var input struct {
 		Name        string   `json:"name"`
 		Description string   `json:"description"`
 		Type        string   `json:"type"`
@@ -160,7 +153,7 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	post := &models.Post{
+	post := &entity.Post{
 		Name:        input.Name,
 		Description: input.Description,
 		Type:        strings.ToLower(input.Type),

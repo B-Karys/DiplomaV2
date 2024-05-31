@@ -1,8 +1,8 @@
 package usecase
 
 import (
+	"DiplomaV2/backend/internal/entity"
 	"DiplomaV2/backend/internal/validator"
-	"DiplomaV2/backend/user/models"
 	"DiplomaV2/backend/user/repository"
 	"DiplomaV2/backend/user/tokenRepository"
 	"github.com/golang-jwt/jwt"
@@ -74,7 +74,7 @@ func (u *userUseCaseImpl) ChangePassword(userId int64, currentPassword string, n
 	return err
 }
 
-func (u *userUseCaseImpl) Authentication(user *models.User) (string, error) {
+func (u *userUseCaseImpl) Authentication(user *entity.User) (string, error) {
 	token, err := u.createAuthenticationToken(user)
 	if err != nil {
 		return TokenCreationFailed.Error(), err
@@ -82,7 +82,7 @@ func (u *userUseCaseImpl) Authentication(user *models.User) (string, error) {
 	return token, nil
 }
 
-func (u *userUseCaseImpl) Registration(user *models.User) (*models.Token, error) {
+func (u *userUseCaseImpl) Registration(user *entity.User) (*entity.Token, error) {
 	err := u.repo.Insert(user)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (u *userUseCaseImpl) Registration(user *models.User) (*models.Token, error)
 	return token, nil
 }
 
-func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, telegram, discord string, skills []string, profileImage string) error {
+func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, username, telegram, discord string, skills []string, profileImage string) error {
 	user, err := u.repo.GetByID(userID)
 	if err != nil {
 		return err
@@ -103,6 +103,7 @@ func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, telegram, 
 
 	user.Name = name
 	user.Surname = surname
+	user.Username = username
 	user.Telegram = telegram
 	user.Discord = discord
 	user.Skills = skills
@@ -126,7 +127,7 @@ func (u *userUseCaseImpl) DeleteUser(id int64) error {
 	return err
 }
 
-func (u *userUseCaseImpl) GetUserById(id int64) (*models.User, error) {
+func (u *userUseCaseImpl) GetUserById(id int64) (*entity.User, error) {
 	user, err := u.repo.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -134,7 +135,7 @@ func (u *userUseCaseImpl) GetUserById(id int64) (*models.User, error) {
 	return user, nil
 }
 
-func (u *userUseCaseImpl) GetUserByEmail(email string) (*models.User, error) {
+func (u *userUseCaseImpl) GetUserByEmail(email string) (*entity.User, error) {
 	user, err := u.repo.GetByEmail(email)
 	if err != nil {
 		return nil, err
@@ -142,13 +143,11 @@ func (u *userUseCaseImpl) GetUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 func (u *userUseCaseImpl) ForgotPassword(email string) (string, error) {
-	// Find the user by email
 	user, err := u.repo.GetByEmail(email)
 	if err != nil {
 		return "", err
 	}
 
-	// Generate the password reset token
 	token, err := u.tokenRepo.New(user.ID, 24*time.Hour, tokenRepository.ScopePasswordReset)
 	if err != nil {
 		return "", err
@@ -171,19 +170,16 @@ func (u *userUseCaseImpl) ResetPassword(tokenString, newPassword string) error {
 		}
 	}
 
-	// Update the user's password
 	err = user.Password.Set(newPassword)
 	if err != nil {
 		return err
-	} // Assume hashing is done in repository
+	}
 
-	// Save the updated user
 	err = u.repo.Update(user)
 	if err != nil {
 		return err
 	}
 
-	// Delete the token after successful password reset
 	err = u.tokenRepo.DeleteAllForUser(tokenRepository.ScopePasswordReset, user.ID)
 	if err != nil {
 		return err
@@ -192,7 +188,7 @@ func (u *userUseCaseImpl) ResetPassword(tokenString, newPassword string) error {
 	return nil
 }
 
-func (u *userUseCaseImpl) createActivationToken(user *models.User) (*models.Token, error) {
+func (u *userUseCaseImpl) createActivationToken(user *entity.User) (*entity.Token, error) {
 	token, err := u.tokenRepo.New(user.ID, 1*time.Hour, tokenRepository.ScopeActivation)
 	if token == nil || err != nil {
 		return nil, err
@@ -200,8 +196,7 @@ func (u *userUseCaseImpl) createActivationToken(user *models.User) (*models.Toke
 	return token, nil
 }
 
-func (u *userUseCaseImpl) createAuthenticationToken(user *models.User) (string, error) {
-	// Define JWT claims
+func (u *userUseCaseImpl) createAuthenticationToken(user *entity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": user.ID,
 		"iat": time.Now().Unix(),
@@ -211,19 +206,12 @@ func (u *userUseCaseImpl) createAuthenticationToken(user *models.User) (string, 
 		"aud": "TeamFinder",
 	}
 
-	// Create and sign the token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 	jwtToken, err := token.SignedString(jwtSecret)
 	if err != nil {
 		return TokenCreationFailed.Error(), err
 	}
-
-	// Optionally create a record in the token tokenRepository
-	//_, err = u.tokenRepo.New(user.ID, 1*time.Hour, tokenRepository.ScopeAuthentication)
-	//if err != nil {
-	//	return "Error while Inserting token to DB", err
-	//}
 
 	return jwtToken, nil
 }

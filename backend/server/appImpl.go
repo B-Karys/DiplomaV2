@@ -3,14 +3,13 @@ package server
 import (
 	"DiplomaV2/backend/internal/config"
 	"DiplomaV2/backend/internal/database"
+	userModels "DiplomaV2/backend/internal/entity"
 	"DiplomaV2/backend/internal/mailer"
 	middleware2 "DiplomaV2/backend/internal/middleware"
 	postHandlers "DiplomaV2/backend/post/handlers"
-	postModels "DiplomaV2/backend/post/models"
 	postRepositories "DiplomaV2/backend/post/repository"
 	postUseCases "DiplomaV2/backend/post/usecase"
 	userHandlers "DiplomaV2/backend/user/handlers"
-	userModels "DiplomaV2/backend/user/models"
 	userRepositories "DiplomaV2/backend/user/repository"
 	tokenRepositories "DiplomaV2/backend/user/tokenRepository"
 	userUseCases "DiplomaV2/backend/user/usecase"
@@ -47,28 +46,23 @@ func (s *echoServer) Start() {
 	s.app.Use(middleware.Recover())
 	s.app.Use(middleware.Logger())
 	s.app.Static("/uploads", filepath.Join(os.Getenv("HOME"), "Desktop", "uploads"))
-	// CORS middleware with configuration
 	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:5173"}, // Specify your React frontend domain here
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true, // Allow credentials (cookies)
-
+		AllowCredentials: true,
 	}))
 
-	// Handle OPTIONS requests
 	s.app.OPTIONS("/*", func(c echo.Context) error {
 		return c.NoContent(http.StatusNoContent)
 	})
 
-	// Health route
 	s.app.GET("v2/health", func(c echo.Context) error {
 		return c.String(200, "OK")
 	})
 
 	s.initializeMigrations()
 
-	// Initialize Handlers
 	s.initializePostHttpHandler()
 	s.initializeUserHttpHandler()
 
@@ -79,7 +73,7 @@ func (s *echoServer) Start() {
 func (s *echoServer) initializeMigrations() {
 	err := s.db.GetDb().AutoMigrate(
 		&userModels.User{},
-		&postModels.Post{},
+		&userModels.Post{},
 		&userModels.Token{},
 	)
 	if err != nil {

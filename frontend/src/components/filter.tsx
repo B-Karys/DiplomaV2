@@ -33,7 +33,6 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
     };
 
     useEffect(() => {
-        // Submit the filters when type, skills, or sortField change
         onFilterChange(type, skills, sortField);
     }, [type, skills, sortField]);
 
@@ -52,7 +51,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
             </div>
             <div className="filter-group">
                 Select skills:
-                {['javascript', 'golang', 'python', 'java', 'c++'].map(skill => (
+                {['golang', 'python', 'java', 'javascript', 'c++','c#','rust','php','kotlin','ruby'].map(skill => (
                     <label className="checkbox-label" key={skill}>
                         <input
                             type="checkbox"

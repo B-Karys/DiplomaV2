@@ -1,16 +1,16 @@
 package usecase
 
 import (
-	"DiplomaV2/backend/user/models"
+	"DiplomaV2/backend/internal/entity"
 )
 
 type UserUseCase interface {
-	Registration(user *models.User) (*models.Token, error)
+	Registration(user *entity.User) (*entity.Token, error)
 	Activation(token string) error
-	Authentication(user *models.User) (string, error)
-	GetUserById(id int64) (*models.User, error)
-	GetUserByEmail(email string) (*models.User, error)
-	UpdateUserInfo(int64, string, string, string, string, []string, string) error
+	Authentication(user *entity.User) (string, error)
+	GetUserById(id int64) (*entity.User, error)
+	GetUserByEmail(email string) (*entity.User, error)
+	UpdateUserInfo(int64, string, string, string, string, string, []string, string) error
 	ChangePassword(userID int64, currentPassword, newPassword string) error
 	ForgotPassword(email string) (string, error)
 	ResetPassword(string, string) error

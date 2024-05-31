@@ -2,7 +2,7 @@ package tokenRepository
 
 import (
 	"DiplomaV2/backend/internal/database"
-	"DiplomaV2/backend/user/models"
+	"DiplomaV2/backend/internal/entity"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
@@ -10,16 +10,15 @@ import (
 )
 
 const (
-	ScopeActivation     = "activation"
-	ScopeAuthentication = "authentication"
-	ScopePasswordReset  = "password-reset"
+	ScopeActivation    = "activation"
+	ScopePasswordReset = "password-reset"
 )
 
 type tokenRepository struct {
 	DB database.Database
 }
 
-func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*models.Token, error) {
+func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*entity.Token, error) {
 	token, err := generateToken(userID, ttl, scope)
 	if err != nil {
 		return nil, err
@@ -28,7 +27,7 @@ func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*m
 	return token, err
 }
 
-func (t *tokenRepository) insert(token *models.Token) error {
+func (t *tokenRepository) insert(token *entity.Token) error {
 	if err := t.DB.GetDb().Create(token).Error; err != nil {
 		return err
 	}
@@ -36,7 +35,7 @@ func (t *tokenRepository) insert(token *models.Token) error {
 }
 
 func (t *tokenRepository) DeleteAllForUser(scope string, userID int64) error {
-	if err := t.DB.GetDb().Where("scope = ? AND user_id = ?", scope, userID).Delete(&models.Token{}).Error; err != nil {
+	if err := t.DB.GetDb().Where("scope = ? AND user_id = ?", scope, userID).Delete(&entity.Token{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -46,8 +45,8 @@ func NewTokenRepository(db database.Database) TokenRepository {
 	return &tokenRepository{DB: db}
 }
 
-func generateToken(userID int64, ttl time.Duration, scope string) (*models.Token, error) {
-	token := &models.Token{
+func generateToken(userID int64, ttl time.Duration, scope string) (*entity.Token, error) {
+	token := &entity.Token{
 		UserID: userID,
 		Expiry: time.Now().Add(ttl),
 		Scope:  scope,

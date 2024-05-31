@@ -116,6 +116,7 @@ export const ManageProfile: React.FC = () => {
         const formData = new FormData();
         formData.append('name', user.name);
         formData.append('surname', user.surname);
+        formData.append('username', user.username)
         formData.append('telegram', user.telegram);
         formData.append('discord', user.discord);
         formData.append('skills', user.skills ? user.skills.join(',') : '');
@@ -169,7 +170,7 @@ export const ManageProfile: React.FC = () => {
                 </div>
                 <div className="form-group">
                     <label>Skills:</label>
-                    {['golang', 'python', 'java', 'javascript', 'c++', 'c#', 'php', 'rust'].map(skill => (
+                    {['golang', 'python', 'java', 'javascript', 'c++','c#','rust','php','kotlin','ruby'].map(skill => (
                         <label key={skill} className="checkbox-label">
                             <input
                                 type="checkbox"

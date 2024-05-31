@@ -35,13 +35,17 @@ export function Navbar() {
     }, []);
 
     const handleDeleteAccount = async () => {
-        try {
-            await axios.delete('http://localhost:4000/v2/users/', {
-                withCredentials: true,
-            });
-            logout();
-        } catch (error) {
-            console.error('Error deleting account:', error);
+        const confirmDelete = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+
+        if (confirmDelete) {
+            try {
+                await axios.delete('http://localhost:4000/v2/users/', {
+                    withCredentials: true,
+                });
+                logout();
+            } catch (error) {
+                console.error('Error deleting account:', error);
+            }
         }
     };
 

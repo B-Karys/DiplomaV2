@@ -75,7 +75,7 @@ export const CreatePost = () => {
                 </div>
                 <div className="form-group">
                     <label>Skills:</label>
-                    {['golang', 'python', 'java', 'javascript'].map((skill) => (
+                    {['golang', 'python', 'java', 'javascript', 'c++','c#','rust','php','kotlin','ruby'].map((skill) => (
                         <label key={skill} className="checkbox-label">
                             <input
                                 type="checkbox"

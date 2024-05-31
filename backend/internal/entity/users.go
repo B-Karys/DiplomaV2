@@ -1,4 +1,4 @@
-package models
+package entity
 
 import (
 	"github.com/lib/pq"
@@ -20,7 +20,9 @@ type User struct {
 	Password     password       `gorm:"embedded;embeddedPrefix:password_" json:"-"`
 	ProfileImage string         `json:"profileImage"`
 	Activated    bool           `gorm:"default:false;not null" json:"activated"`
-	Version      int            `gorm:"autoIncrement;not null" json:"-"`
+	Version      int            `gorm:"not null;default:1" json:"-"`
+	Posts        []Post         `gorm:"foreignKey:AuthorID;constraint:OnDelete:CASCADE;" json:"posts"`
+	Tokens       []Token        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;" json:"tokens"`
 }
 
 type Token struct {
@@ -31,16 +33,6 @@ type Token struct {
 	Expiry    time.Time `gorm:"not null" json:"expiry"`
 	Scope     string    `gorm:"not null" json:"-"`
 }
-
-/*
-type Token struct {
-	Hash   []byte    `gorm:"primaryKey"`
-	UserID uint64    `gorm:"not null"`
-	User   User      `gorm:"constraint:OnDelete:CASCADE"`
-	Expiry time.Time `gorm:"not null"`
-	Scope  string    `gorm:"not null"`
-}
-*/
 
 type password struct {
 	Plaintext *string `gorm:"-"`
