@@ -13,7 +13,6 @@ import (
 	"golang.org/x/net/context"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
@@ -328,7 +327,7 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 
 		// Initialize GCS client
 		ctx := context.Background()
-		client, err := helpers.NewStorageClient(ctx, os.Getenv("KEY_FILE"))
+		client, err := helpers.NewStorageClient(ctx, "C:/Users/krump/Downloads/lucid-volt-424719-f0-5df86076a210.json")
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to initialize GCS client"})
 		}
@@ -365,21 +364,6 @@ func (u *userHttpHandler) DeleteUser(c echo.Context) error {
 }
 
 func (u *userHttpHandler) Logout(c echo.Context) error {
-	/* //TODO: once the refresh tokens are done
-	token := c.Get("context_token").(string)
-	println("context token is:", token)
-
-	userID, ok := c.Get("userID").(int64)
-	if !ok {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid user ID"})
-	}
-
-	err := u.userUseCase.DeleteToken(userID, token)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-	*/
-
 	c.SetCookie(&http.Cookie{
 		Name:     "jwt",
 		Value:    "",
