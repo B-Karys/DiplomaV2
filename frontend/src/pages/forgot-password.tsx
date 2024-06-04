@@ -1,5 +1,5 @@
 import { TextInput, Paper, Title, Container, Button, Text } from '@mantine/core';
-import { useState } from 'react';
+import { SetStateAction, useState} from 'react';
 import axios from "axios";
 
 export const ForgotPassword = () => {
@@ -8,23 +8,25 @@ export const ForgotPassword = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
 
-    const handleEmailChange = (event) => {
+    const handleEmailChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setEmail(event.target.value);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         setSuccess(null);
 
         try {
-            const response = await axios.post(
+            await axios.post(
                 'http://localhost:4000/v2/users/forgot-password',
                 { email }
             );
+// @ts-ignore
             setSuccess('Password reset email sent successfully');
         } catch (error) {
+            // @ts-ignore
             setError(error.response?.data?.message || 'An error occurred');
         } finally {
             setLoading(false);

@@ -42,7 +42,7 @@ export function Authentication() {
             .then(async response => {
                 if (response.ok) {
                     // Set the authenticated flag in local storage with expiration of 2 minutes
-                    setItemWithExpiration('authenticated', 'true', 23.5 * 60 * 60 * 1000);
+                    setItemWithExpiration('authenticated', 'true', 23.89 * 60 * 60 * 1000);
 
                     // Redirect to home page after successful login
                     window.location.href = '/';

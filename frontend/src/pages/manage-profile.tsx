@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Resizer from 'react-image-file-resizer';
-import '../styles/manage-profile.css';
+import '../styles/manage-profile.module.css';
 
 interface User {
     id: number;
@@ -70,6 +70,7 @@ export const ManageProfile: React.FC = () => {
             100,
             0,
             (uri) => {
+                // @ts-ignore
                 setResizedProfileImage(uri as string);
                 setLoading(false);
             },

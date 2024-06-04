@@ -64,6 +64,7 @@ const MyPostsRoute = () => {
 const ProfilePageRoute = () => {
     const { isAuthenticated } = useAuth();
     const { id } = useParams(); // Get the user ID from URL parameters
+    // @ts-ignore
     return isAuthenticated ? <ProfilePage userId={id} /> : <Navigate to="/login" />;
 }
 

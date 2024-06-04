@@ -25,7 +25,7 @@ export function ChangePassword() {
         }
 
         try {
-            const response = await axios.patch(
+            await axios.patch(
                 'http://localhost:4000/v2/users/password',
                 {
                     currentPassword,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../styles/manage-posts.css'; // Import the CSS file for styling
+import '../styles/manage-posts.module.css'; // Import the CSS file for styling
 
 export const CreatePost = () => {
     const navigate = useNavigate(); // Initialize the navigate function

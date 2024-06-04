@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom'; // Import Link for routing
 import Filter from '../components/filter.tsx';
 import '@mantine/core/styles.css';
-import '../styles/home.css'; // Import the CSS file
+import '../styles/home.module.css'; // Import the CSS file
 
 interface Post {
     id: number;
