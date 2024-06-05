@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import '@mantine/core/styles.css';
 import { Link } from 'react-router-dom'; // Import Link for routing
-import "../styles/my-posts.module.css"
+import "../styles/my-posts.css"
 
 interface Post {
     id: number;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IconBrandTelegram, IconBrandDiscord } from '@tabler/icons-react';
 import axios from 'axios';
-import '../styles/profile-page.module.css';
+import '../styles/profile-page.css';
 
 interface User {
     id: number;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/filter.module.css'; // Import the CSS file for styling
+import '../styles/filter.css'; // Import the CSS file for styling
 
 interface FilterProps {
     onFilterChange: (type: string, skills: string[], sort: string) => void;
@@ -37,7 +37,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, initialType, initialSki
     }, [type, skills, sortField]);
 
     return (
-        <div className="filter-container">
+        <div>
             <h2>Filter</h2>
             <div className="filter-group">
                 <label>
