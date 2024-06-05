@@ -3,11 +3,12 @@ package repository
 import (
 	"DiplomaV2/backend/internal/database"
 	"DiplomaV2/backend/internal/entity"
-	"DiplomaV2/backend/post/filters"
+	"DiplomaV2/backend/post"
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"math"
 )
 
 type postRepository struct {
@@ -72,7 +73,7 @@ func (m *postRepository) DeleteAllForUser(userID int64) error {
 	return nil
 }
 
-func (m *postRepository) GetFilteredPosts(name, description, author, postType string, skills []string, filters filters.Filters) ([]*entity.Post, error) {
+func (m *postRepository) GetFilteredPosts(name, description, author, postType string, skills []string, filters post.Filters) ([]*entity.Post, post.Metadata, error) {
 	var posts []*entity.Post
 	query := m.DB.GetDb().Model(&entity.Post{})
 
@@ -92,6 +93,12 @@ func (m *postRepository) GetFilteredPosts(name, description, author, postType st
 		query = query.Where("skills @> ?", pq.Array(skills))
 	}
 
+	var totalRecords int64
+	countQuery := *query
+	if err := countQuery.Count(&totalRecords).Error; err != nil {
+		return nil, post.Metadata{}, err
+	}
+
 	if filters.Sort != "" && contains(filters.SortSafeList, filters.Sort) {
 		query = query.Order(fmt.Sprintf("%s %s", filters.SortColumn(), filters.SortDirection()))
 	}
@@ -99,10 +106,11 @@ func (m *postRepository) GetFilteredPosts(name, description, author, postType st
 	query = query.Offset((filters.Page - 1) * filters.PageSize).Limit(filters.PageSize)
 
 	if err := query.Find(&posts).Error; err != nil {
-		return nil, err
+		return nil, post.Metadata{}, err
 	}
 
-	return posts, nil
+	metadata := calculateMetadata(int(totalRecords), filters.Page, filters.PageSize)
+	return posts, metadata, nil
 }
 
 func contains(list []string, value string) bool {
@@ -112,4 +120,18 @@ func contains(list []string, value string) bool {
 		}
 	}
 	return false
+}
+
+func calculateMetadata(totalRecords, page, pageSize int) post.Metadata {
+	if totalRecords == 0 {
+		// Note that we return an empty Metadata struct if there are no records.
+		return post.Metadata{}
+	}
+	return post.Metadata{
+		CurrentPage:  page,
+		PageSize:     pageSize,
+		FirstPage:    1,
+		LastPage:     int(math.Ceil(float64(totalRecords) / float64(pageSize))),
+		TotalRecords: totalRecords,
+	}
 }

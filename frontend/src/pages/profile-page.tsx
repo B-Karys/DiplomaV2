@@ -32,7 +32,7 @@ interface ProfilePageProps {
 
 export function ProfilePage({ userId }: ProfilePageProps) {
     const [user, setUser] = useState<User | null>(null);
-    const [posts, setPosts] = useState<Post[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]); // Initialize posts state as an empty array
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [postsLoading, setPostsLoading] = useState<boolean>(true);
@@ -44,6 +44,8 @@ export function ProfilePage({ userId }: ProfilePageProps) {
     }, [userId]); // Fetch data whenever userId changes
 
     const fetchUserData = async () => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await fetch(`http://localhost:4000/v2/users/${userId}`, {
                 method: 'GET',
@@ -58,11 +60,11 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             }
 
             const userData = await response.json();
-            setUser(userData);
+            setUser(userData); // Set user data
             setLoading(false);
         } catch (error) {
-            setError((error as Error).message);
             setLoading(false);
+            setError((error as Error).message);
             console.error('Error fetching user data:', error);
         }
     };
@@ -74,7 +76,7 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             const response = await axios.get<Post[]>(`http://localhost:4000/v2/posts/?author=${userId}`, {
                 withCredentials: true,
             });
-            setPosts(response.data);
+            setPosts(response.data.posts); // Assuming the response has a "posts" field
             setPostsLoading(false);
         } catch (error) {
             setPostsLoading(false);
@@ -133,19 +135,21 @@ export function ProfilePage({ userId }: ProfilePageProps) {
                         <h2>Author's Posts</h2>
                         {postsLoading && <p>Loading posts...</p>}
                         {postsError && <p>Error loading posts: {postsError}</p>}
-                        {posts && Array.isArray(posts) && (
-                        <div className="profile-posts-container">
-                            {posts.map(post => (
-                                <div key={post.id} className="profile-post">
-                                    <h3>{post.name}</h3>
-                                    <p>{post.description}</p>
-                                    <p><strong>Type:</strong> {post.type}</p>
-                                    <p><strong>Skills:</strong> {post.skills.join(', ')}</p>
-                                    <p><strong>Created At:</strong> {new Date(post.createdAt).toLocaleString()}</p>
-                                </div>
-                            ))}
-                        </div>
-                            )}
+                        {posts && Array.isArray(posts) && posts.length > 0 ? (
+                            <div className="profile-posts-container">
+                                {posts.map(post => (
+                                    <div key={post.id} className="profile-post">
+                                        <h3>{post.name}</h3>
+                                        <p>{post.description}</p>
+                                        <p><strong>Type:</strong> {post.type}</p>
+                                        <p><strong>Skills:</strong> {post.skills.join(', ')}</p>
+                                        <p><strong>Created At:</strong> {new Date(post.createdAt).toLocaleString()}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p>No posts available.</p>
+                        )}
                     </div>
                 </div>
             </div>

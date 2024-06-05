@@ -14,6 +14,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -287,6 +288,7 @@ func (u *userHttpHandler) GetUserInfoById(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, user)
 }
+
 func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 	fmt.Println("Updating user info...")
 
@@ -351,12 +353,35 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 }
 
 func (u *userHttpHandler) DeleteUser(c echo.Context) error {
+	// Get the userID
+	userID := c.Get("userID").(int64)
 
-	contextUser := c.Get("userID").(int64)
+	// Retrieve user information to get the profile image URL
+	userInfo, err := u.userUseCase.GetUserById(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve user information"})
+	}
+
+	// If profile image URL exists, delete the corresponding object from GCS
+	if userInfo.ProfileImage != "" {
+		// Extract object name from the profile image URL
+		objectName := userInfo.ProfileImage[strings.LastIndex(userInfo.ProfileImage, "/")+1:]
+
+		// Initialize GCS client
+		ctx := context.Background()
+		client, err := helpers.NewStorageClient(ctx, "C:/Users/krump/Downloads/lucid-volt-424719-f0-5df86076a210.json")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to initialize GCS client"})
+		}
+
+		// Delete the object from GCS
+		if err := helpers.DeleteFileFromGCS(ctx, client, "teamfinderimages", objectName); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete profile image from GCS"})
+		}
+	}
 
 	// Call the repository method to delete the user
-	err := u.userUseCase.DeleteUser(contextUser)
-	if err != nil {
+	if err := u.userUseCase.DeleteUser(userID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete user"})
 	}
 

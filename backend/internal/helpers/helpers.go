@@ -3,6 +3,7 @@ package helpers
 import (
 	"DiplomaV2/backend/internal/validator"
 	"cloud.google.com/go/storage"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"io"
@@ -49,6 +50,18 @@ func UploadFileToGCS(ctx context.Context, client *storage.Client, bucketName, ob
 	if err := wc.Close(); err != nil {
 		return err
 	}
+	return nil
+}
+
+func DeleteFileFromGCS(ctx context.Context, client *storage.Client, bucketName, objectName string) error {
+	// Creates a new Storage client.
+	bucket := client.Bucket(bucketName)
+
+	// Deletes the object from the bucket.
+	if err := bucket.Object(objectName).Delete(ctx); err != nil {
+		return fmt.Errorf("failed to delete object: %v", err)
+	}
+
 	return nil
 }
 

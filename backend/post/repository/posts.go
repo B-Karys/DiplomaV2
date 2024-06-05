@@ -2,7 +2,7 @@ package repository
 
 import (
 	"DiplomaV2/backend/internal/entity"
-	"DiplomaV2/backend/post/filters"
+	"DiplomaV2/backend/post"
 )
 
 type PostRepository interface {
@@ -11,5 +11,5 @@ type PostRepository interface {
 	Delete(id int64) error
 	Update(post *entity.Post) error
 	DeleteAllForUser(authorid int64) error
-	GetFilteredPosts(name, description, author, postType string, skills []string, filters filters.Filters) ([]*entity.Post, error)
+	GetFilteredPosts(name, description, author, postType string, skills []string, filters post.Filters) ([]*entity.Post, post.Metadata, error)
 }

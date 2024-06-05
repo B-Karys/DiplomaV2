@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Import Link for routing
+import { Link } from 'react-router-dom';
 import Filter from '../components/filter.tsx';
 import '@mantine/core/styles.css';
-import '../styles/home.module.css'; // Import the CSS file
+import '../styles/home.css';
 
 interface Post {
     id: number;
@@ -15,15 +15,22 @@ interface Post {
     skills: string[];
 }
 
+interface Metadata {
+    current_page: number;
+    page_size: number;
+    total_records: number;
+}
+
 export function Home() {
     const [posts, setPosts] = useState<Post[]>([]);
+    const [metadata, setMetadata] = useState<Metadata>({ current_page: 1, page_size: 20, total_records: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [type, setType] = useState<string>('');
     const [skills, setSkills] = useState<string[]>([]);
     const [sort, setSort] = useState<string>('created_at');
 
-    const fetchPosts = async (type: string, skills: string[], sort: string) => {
+    const fetchPosts = async (type: string, skills: string[], sort: string, page: number) => {
         setLoading(true);
         setError(null);
         try {
@@ -31,9 +38,11 @@ export function Home() {
             if (type) params.append('type', type);
             if (skills.length) params.append('skills', skills.join(','));
             if (sort) params.append('sort', sort);
+            params.append('page', page.toString());
 
-            const response = await axios.get<Post[]>(`http://localhost:4000/v2/posts/?${params.toString()}`);
-            setPosts(response.data);
+            const response = await axios.get<{ posts: Post[]; metadata: Metadata }>(`http://localhost:4000/v2/posts/?${params.toString()}`);
+            setPosts(response.data.posts);
+            setMetadata(response.data.metadata);
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setError(error.message);
@@ -46,13 +55,19 @@ export function Home() {
     };
 
     useEffect(() => {
-        fetchPosts(type, skills, sort);
-    }, [type, skills, sort]);
+        fetchPosts(type, skills, sort, metadata.current_page);
+    }, [type, skills, sort, metadata.current_page]);
 
     const handleFilterChange = (selectedType: string, selectedSkills: string[], selectedSort: string) => {
         setType(selectedType);
         setSkills(selectedSkills);
         setSort(selectedSort);
+    };
+
+    const totalPages = Math.ceil(metadata.total_records / metadata.page_size);
+
+    const onPageChange = (page: number) => {
+        setMetadata(prevMetadata => ({ ...prevMetadata, current_page: page }));
     };
 
     if (loading) return <div>Loading...</div>;
@@ -82,6 +97,13 @@ export function Home() {
                     </div>
                 ))}
             </div>
+            {totalPages > 1 && (
+                <div className="pagination">
+                    {[...Array(totalPages)].map((_, index) => (
+                        <button key={index} onClick={() => onPageChange(index + 1)}>{index + 1}</button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

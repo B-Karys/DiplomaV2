@@ -67,10 +67,10 @@ export function MyProfilePage() {
         setPostsLoading(true);
         setPostsError(null);
         try {
-            const response = await axios.get<Post[]>('http://localhost:4000/v2/posts/my', {
+            const response = await axios.get('http://localhost:4000/v2/posts/my', {
                 withCredentials: true,
             });
-            setPosts(response.data);
+            setPosts(response.data.posts || []); // Ensure posts is an array
             setPostsLoading(false);
         } catch (error) {
             setPostsLoading(false);
@@ -130,15 +130,19 @@ export function MyProfilePage() {
                         {postsLoading && <p>Loading posts...</p>}
                         {postsError && <p>Error loading posts: {postsError}</p>}
                         <div className="profile-posts-container">
-                            {posts.map(post => (
-                                <div key={post.id} className="profile-post">
-                                    <h3>{post.name}</h3>
-                                    <p>{post.description}</p>
-                                    <p><strong>Type:</strong> {post.type}</p>
-                                    <p><strong>Skills:</strong> {post.skills.join(', ')}</p>
-                                    <p><strong>Created At:</strong> {new Date(post.createdAt).toLocaleString()}</p>
-                                </div>
-                            ))}
+                            {Array.isArray(posts) && posts.length > 0 ? (
+                                posts.map(post => (
+                                    <div key={post.id} className="profile-post">
+                                        <h3>{post.name}</h3>
+                                        <p>{post.description}</p>
+                                        <p><strong>Type:</strong> {post.type}</p>
+                                        <p><strong>Skills:</strong> {post.skills.join(', ')}</p>
+                                        <p><strong>Created At:</strong> {new Date(post.createdAt).toLocaleString()}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No posts available.</p>
+                            )}
                         </div>
                     </div>
                 </div>

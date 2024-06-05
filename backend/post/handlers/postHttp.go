@@ -4,7 +4,7 @@ import (
 	"DiplomaV2/backend/internal/entity"
 	"DiplomaV2/backend/internal/helpers"
 	"DiplomaV2/backend/internal/validator"
-	"DiplomaV2/backend/post/filters"
+	"DiplomaV2/backend/post"
 	"DiplomaV2/backend/post/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -19,13 +19,14 @@ type postHttpHandler struct {
 
 func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 	userID := c.Get("userID").(int64)
-	userIDstring := strconv.FormatInt(userID, 10)
+	userIDString := strconv.FormatInt(userID, 10)
 	var input struct {
 		Name        string
 		Description string
+		Author      string
 		PostType    string
 		Skills      []string
-		filters.Filters
+		post.Filters
 	}
 
 	v := validator.New()
@@ -34,13 +35,12 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 
 	input.Name = helpers.ReadString(qs, "name", "")
 	input.Description = helpers.ReadString(qs, "description", "")
-
 	input.PostType = helpers.ReadString(qs, "type", "")
-
+	input.Author = helpers.ReadString(qs, "author", userIDString)
 	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
 
 	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
-	input.Filters.PageSize = helpers.ReadInt(qs, "pageSize", 20, v)
+	input.Filters.PageSize = helpers.ReadInt(qs, "pageSize", 10, v)
 	input.Filters.Sort = helpers.ReadString(qs, "sort", "created_at")
 	input.Filters.SortSafeList = []string{"name", "created_at", "-name", "-created_at"}
 
@@ -48,16 +48,26 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if filters.ValidateFilters(v, input.Filters); !v.Valid() {
+	if post.ValidateFilters(v, input.Filters); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	posts, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, userIDstring, input.PostType, input.Skills, input.Filters)
+	posts, metadata, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, input.Author, input.PostType, input.Skills, input.Filters)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, posts)
+	type Response struct {
+		Posts    []*entity.Post `json:"posts"`
+		Metadata post.Metadata  `json:"metadata"`
+	}
+
+	response := Response{
+		Posts:    posts,
+		Metadata: metadata,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
@@ -67,7 +77,7 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 		Author      string
 		PostType    string
 		Skills      []string
-		filters.Filters
+		post.Filters
 	}
 
 	v := validator.New()
@@ -84,7 +94,7 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
 
 	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
-	input.Filters.PageSize = helpers.ReadInt(qs, "pageSize", 20, v)
+	input.Filters.PageSize = helpers.ReadInt(qs, "pageSize", 10, v)
 	input.Filters.Sort = helpers.ReadString(qs, "sort", "created_at")
 	input.Filters.SortSafeList = []string{"name", "created_at", "-name", "-created_at"}
 
@@ -92,16 +102,27 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if filters.ValidateFilters(v, input.Filters); !v.Valid() {
+	if post.ValidateFilters(v, input.Filters); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	posts, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, input.Author, input.PostType, input.Skills, input.Filters)
+	posts, metadata, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, input.Author, input.PostType, input.Skills, input.Filters)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, posts)
+	// Create a custom response struct
+	type Response struct {
+		Posts    []*entity.Post `json:"posts"`
+		Metadata post.Metadata  `json:"metadata"`
+	}
+
+	response := Response{
+		Posts:    posts,
+		Metadata: metadata,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (p *postHttpHandler) DeletePost(c echo.Context) error {

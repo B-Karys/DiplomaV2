@@ -1,4 +1,4 @@
-package filters
+package post
 
 import (
 	"DiplomaV2/backend/internal/validator"
@@ -10,6 +10,14 @@ type Filters struct {
 	PageSize     int
 	Sort         string
 	SortSafeList []string
+}
+
+type Metadata struct {
+	CurrentPage  int `json:"current_page,omitempty"`
+	PageSize     int `json:"page_size,omitempty"`
+	FirstPage    int `json:"first_page,omitempty"`
+	LastPage     int `json:"last_page,omitempty"`
+	TotalRecords int `json:"total_records,omitempty"`
 }
 
 func ValidateFilters(v *validator.Validator, f Filters) {

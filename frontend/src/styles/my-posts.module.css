@@ -1,15 +1,16 @@
 .my-myContainer {
     display: flex;
-    justify-content: center; /* Center the content horizontally */
-    height: 100vh; /* Use the full viewport height */
+    justify-content: center;
+    position: relative;
 }
 
 .my-posts-container {
     display: flex;
-    flex-direction: column; /* Stack the posts vertically */
-    align-items: center; /* Center the posts horizontally */
-    width: 70%; /* Set the width to 70% of the viewport */
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
     padding: 20px;
+    position: relative;
 }
 
 .my-post {
@@ -19,4 +20,28 @@
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 60%;
+}
+
+.pagination {
+    position: absolute;
+    bottom: -30px; /* Adjust the distance from the bottom */
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background-color: #007bff;
+    color: white;
 }
