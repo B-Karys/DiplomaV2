@@ -13,6 +13,8 @@ import (
 	"gorm.io/gorm"
 	"mime/multipart"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -112,6 +114,7 @@ func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, username, 
 	user.Discord = discord
 	user.Skills = skills
 	user.Version = user.Version + 1
+
 	if profileImage != "" {
 		user.ProfileImage = profileImage
 	}
@@ -155,7 +158,26 @@ func (u *userUseCaseImpl) UploadProfileImage(userID int64, file *multipart.FileH
 		return "", errors.New("Failed to upload file to GCS")
 	}
 
-	profileImageURL := fmt.Sprintf("https://storage.googleapis.com/teamfinderimages/%d", userID)
+	flood := user.ProfileImage == "https://storage.googleapis.com/teamfinderimages/default_photo.png"
+	baseUrl := "https://storage.googleapis.com/teamfinderimages/" + strconv.FormatInt(user.ID, 10) + "/"
+	var profileImageURL string
+
+	if flood {
+		// If the user's profile image is default, set profile image URL to baseUrl/1
+		profileImageURL = baseUrl + "1"
+	} else {
+		// If the user's profile image is not default, extract the number from the URL, increment it by 1, and construct the new URL
+		endIndex := strings.LastIndex(user.ProfileImage, "/") + 1
+		numStr := user.ProfileImage[endIndex:]
+		num, err := strconv.Atoi(numStr)
+		if err != nil {
+			// Handle error
+			return "", err
+		}
+		num++
+		profileImageURL = baseUrl + strconv.Itoa(num)
+	}
+
 	return profileImageURL, nil
 }
 
@@ -171,10 +193,6 @@ func (u *userUseCaseImpl) GetUserById(id int64) (*entity.User, error) {
 	user, err := u.repo.GetByID(id)
 	if err != nil {
 		return nil, err
-	}
-	if user.ProfileImage != "" {
-		// Use fmt.Sprintf to format the string with the version number
-		user.ProfileImage = fmt.Sprintf("%s/%d", user.ProfileImage, user.Version-1)
 	}
 	return user, nil
 }

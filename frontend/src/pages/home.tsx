@@ -23,7 +23,7 @@ interface Metadata {
 
 export function Home() {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [metadata, setMetadata] = useState<Metadata>({ current_page: 1, page_size: 20, total_records: 0 });
+    const [metadata, setMetadata] = useState<Metadata>({current_page: 1, page_size: 20, total_records: 0});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [type, setType] = useState<string>('');
@@ -41,8 +41,13 @@ export function Home() {
             params.append('page', page.toString());
 
             const response = await axios.get<{ posts: Post[]; metadata: Metadata }>(`http://localhost:4000/v2/posts/?${params.toString()}`);
-            setPosts(response.data.posts);
-            setMetadata(response.data.metadata);
+
+            if (response.data.posts.length === 0) {
+                setError('There are no posts at the moment.');
+            } else {
+                setPosts(response.data.posts);
+                setMetadata(response.data.metadata);
+            }
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setError(error.message);
@@ -53,6 +58,7 @@ export function Home() {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchPosts(type, skills, sort, metadata.current_page);
@@ -67,7 +73,7 @@ export function Home() {
     const totalPages = Math.ceil(metadata.total_records / metadata.page_size);
 
     const onPageChange = (page: number) => {
-        setMetadata(prevMetadata => ({ ...prevMetadata, current_page: page }));
+        setMetadata(prevMetadata => ({...prevMetadata, current_page: page}));
     };
 
     if (loading) return <div>Loading...</div>;
@@ -84,18 +90,22 @@ export function Home() {
                 />
             </div>
             <div className="home-posts-container">
-                {posts.map(post => (
-                    <div key={post.id} className="home-post">
-                        <h2>{post.name}</h2>
-                        <p>{post.description}</p>
-                        <p>
-                            <Link to={`/profile/${post.authorId}`}>Author</Link>
-                        </p>
-                        <p>Type: {post.type}</p>
-                        <p>Skills: {post.skills.join(', ')}</p>
-                        <p>Created At: {new Date(post.createdAt).toLocaleDateString()}</p>
-                    </div>
-                ))}
+                {posts.length === 0 ? (
+                    <div>There are no posts at the moment.</div>
+                ) : (
+                    posts.map(post => (
+                        <div key={post.id} className="home-post">
+                            <h2>{post.name}</h2>
+                            <p>{post.description}</p>
+                            <p>
+                                <Link to={`/profile/${post.authorId}`}>Author</Link>
+                            </p>
+                            <p>Type: {post.type}</p>
+                            <p>Skills: {post.skills.join(', ')}</p>
+                            <p>Created At: {new Date(post.createdAt).toLocaleDateString()}</p>
+                        </div>
+                    ))
+                )}
             </div>
             {totalPages > 1 && (
                 <div className="pagination">

@@ -223,10 +223,11 @@ func (u *userHttpHandler) Registration(c echo.Context) error {
 	}
 
 	user := &entity.User{
-		Name:      input.Name,
-		Username:  input.Username,
-		Email:     input.Email,
-		Activated: false,
+		Name:         input.Name,
+		Username:     input.Username,
+		Email:        input.Email,
+		ProfileImage: "https://storage.googleapis.com/teamfinderimages/default_photo.png",
+		Activated:    false,
 	}
 
 	err := user.Password.Set(input.Password)

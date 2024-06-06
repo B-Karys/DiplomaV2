@@ -63,18 +63,22 @@ export function MyPosts() {
     return (
         <div className="my-myContainer">
             <div className="my-posts-container">
-                {posts.map(post => (
-                    <div key={post.id} className="my-post">
-                        <h2>{post.name}</h2>
-                        <p>{post.description}</p>
-                        <p>Type: {post.type}</p>
-                        <p>Skills: {post.skills.join(', ')}</p>
-                        <p>Created At: {new Date(post.createdAt).toLocaleString()}</p>
-                        <Link to={`/manage-post/${post.id}`}>
-                            <button className="blue-button">Manage Post</button>
-                        </Link>
-                    </div>
-                ))}
+                {posts.length === 0 ? (
+                    <div>There are no posts at the moment.</div>
+                ) : (
+                    posts.map(post => (
+                        <div key={post.id} className="my-post">
+                            <h2>{post.name}</h2>
+                            <p>{post.description}</p>
+                            <p>Type: {post.type}</p>
+                            <p>Skills: {post.skills.join(', ')}</p>
+                            <p>Created At: {new Date(post.createdAt).toLocaleString()}</p>
+                            <Link to={`/manage-post/${post.id}`}>
+                                <button className="blue-button">Manage Post</button>
+                            </Link>
+                        </div>
+                    ))
+                )}
             </div>
             {totalPages > 1 && (
                 <div className="pagination">
