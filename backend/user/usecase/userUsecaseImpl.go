@@ -2,12 +2,16 @@ package usecase
 
 import (
 	"DiplomaV2/backend/internal/entity"
+	"DiplomaV2/backend/internal/helpers"
 	"DiplomaV2/backend/internal/validator"
 	"DiplomaV2/backend/user/repository"
 	"DiplomaV2/backend/user/tokenRepository"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
+	"golang.org/x/net/context"
 	"gorm.io/gorm"
+	"mime/multipart"
 	"os"
 	"time"
 )
@@ -107,7 +111,7 @@ func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, username, 
 	user.Telegram = telegram
 	user.Discord = discord
 	user.Skills = skills
-
+	user.Version = user.Version + 1
 	if profileImage != "" {
 		user.ProfileImage = profileImage
 	}
@@ -117,6 +121,42 @@ func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, username, 
 		return err
 	}
 	return nil
+}
+
+func (u *userUseCaseImpl) UploadProfileImage(userID int64, file *multipart.FileHeader) (string, error) {
+	user, err := u.repo.GetByID(userID)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("Uploading profile image...")
+
+	src, err := file.Open()
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return "", errors.New("Failed to open file")
+	}
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
+			return
+		}
+	}(src)
+
+	// Initialize GCS client
+	ctx := context.Background()
+	client, err := helpers.NewStorageClient(ctx, "C:/Users/krump/Downloads/lucid-volt-424719-f0-5df86076a210.json")
+	if err != nil {
+		return "", errors.New("Failed to initialize GCS client")
+	}
+
+	objectName := fmt.Sprintf("%d/%d", userID, user.Version) // Unique object name based on user ID
+	if err := helpers.UploadFileToGCS(ctx, client, "teamfinderimages", objectName, src); err != nil {
+		return "", errors.New("Failed to upload file to GCS")
+	}
+
+	profileImageURL := fmt.Sprintf("https://storage.googleapis.com/teamfinderimages/%d", userID)
+	return profileImageURL, nil
 }
 
 func (u *userUseCaseImpl) DeleteUser(id int64) error {
@@ -131,6 +171,10 @@ func (u *userUseCaseImpl) GetUserById(id int64) (*entity.User, error) {
 	user, err := u.repo.GetByID(id)
 	if err != nil {
 		return nil, err
+	}
+	if user.ProfileImage != "" {
+		// Use fmt.Sprintf to format the string with the version number
+		user.ProfileImage = fmt.Sprintf("%s/%d", user.ProfileImage, user.Version-1)
 	}
 	return user, nil
 }

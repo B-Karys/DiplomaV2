@@ -53,6 +53,19 @@ func UploadFileToGCS(ctx context.Context, client *storage.Client, bucketName, ob
 	return nil
 }
 
+func DownloadFileFromGCS(ctx context.Context, client *storage.Client, bucketName, objectName string, dest io.Writer) error {
+	rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	if _, err := io.Copy(dest, rc); err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteFileFromGCS(ctx context.Context, client *storage.Client, bucketName, objectName string) error {
 	// Creates a new Storage client.
 	bucket := client.Bucket(bucketName)

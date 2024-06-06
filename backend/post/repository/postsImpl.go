@@ -25,14 +25,14 @@ func (m *postRepository) Insert(post *entity.Post) error {
 }
 
 func (m *postRepository) GetByID(postID int64) (*entity.Post, error) {
-	var post entity.Post
-	if err := m.DB.GetDb().Where("id = ?", postID).First(&post).Error; err != nil {
+	var thePost entity.Post
+	if err := m.DB.GetDb().Where("id = ?", postID).First(&thePost).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("post not found")
+			return nil, errors.New("thePost not found")
 		}
 		return nil, err
 	}
-	return &post, nil
+	return &thePost, nil
 }
 
 func (m *postRepository) Delete(id int64) error {

@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
-	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -315,31 +314,10 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 		file := profileImage[0]
 		fmt.Println("Received file:", file.Filename)
 
-		src, err := file.Open()
+		profileImageURL, err = u.userUseCase.UploadProfileImage(userID, file)
 		if err != nil {
-			fmt.Println("Error opening file:", err)
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to open file"})
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		}
-		defer func(src multipart.File) {
-			err := src.Close()
-			if err != nil {
-				return
-			}
-		}(src)
-
-		// Initialize GCS client
-		ctx := context.Background()
-		client, err := helpers.NewStorageClient(ctx, "C:/Users/krump/Downloads/lucid-volt-424719-f0-5df86076a210.json")
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to initialize GCS client"})
-		}
-
-		objectName := fmt.Sprintf("%d", userID) // Unique object name based on user ID
-		if err := helpers.UploadFileToGCS(ctx, client, "teamfinderimages", objectName, src); err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to upload file to GCS"})
-		}
-
-		profileImageURL = fmt.Sprintf("https://storage.googleapis.com/teamfinderimages/%d", userID)
 	}
 
 	err = u.userUseCase.UpdateUserInfo(userID, name, surname, username, telegram, discord, skills, profileImageURL)
