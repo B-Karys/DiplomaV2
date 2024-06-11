@@ -9,6 +9,7 @@ type UserUseCase interface {
 	Registration(user *entity.User) (*entity.Token, error)
 	Activation(token string) error
 	Authentication(user *entity.User) (string, error)
+	GetAllUsers() ([]*entity.User, error)
 	GetUserById(id int64) (*entity.User, error)
 	GetUserByEmail(email string) (*entity.User, error)
 	UpdateUserInfo(int64, string, string, string, string, string, []string, string) error

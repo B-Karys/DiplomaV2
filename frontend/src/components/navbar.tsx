@@ -57,10 +57,16 @@ export function Navbar() {
                         <Link to="/" className={classes.link}>
                             Home
                         </Link>
-                        {isAuthenticated && (
-                            <Link to="/posts" className={classes.link}>
-                                My Posts
-                            </Link>
+                        {isAuthenticated && (<>
+                                <Link to="/posts" className={classes.link}>
+                                    My Posts
+                                </Link>
+                                <Link to="/hr/users" className={classes.link}>
+                                    Hr Page
+                                </Link>
+                        </>
+
+
                         )}
                     </Group>
                     <Group visibleFrom="sm" className={classes.m_4081bf90}>

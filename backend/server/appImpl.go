@@ -5,7 +5,7 @@ import (
 	"DiplomaV2/backend/internal/database"
 	userModels "DiplomaV2/backend/internal/entity"
 	"DiplomaV2/backend/internal/mailer"
-	middleware2 "DiplomaV2/backend/internal/middleware"
+	mymiddleware "DiplomaV2/backend/internal/middleware"
 	postHandlers "DiplomaV2/backend/post/handlers"
 	postRepositories "DiplomaV2/backend/post/repository"
 	postUseCases "DiplomaV2/backend/post/usecase"
@@ -90,12 +90,13 @@ func (s *echoServer) initializeUserHttpHandler() {
 		userRouters.GET("/activate/:token", userHttpHandler.Activation)
 		userRouters.POST("/login", userHttpHandler.Authentication)
 		userRouters.GET("/check-auth", userHttpHandler.CheckAuth)
-		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, middleware2.LoginMiddleware)
-		userRouters.GET("/my", userHttpHandler.GetMyInfo, middleware2.LoginMiddleware)
-		userRouters.PATCH("/update", userHttpHandler.UpdateUserInfo, middleware2.LoginMiddleware)
-		userRouters.PATCH("/password", userHttpHandler.ChangePassword, middleware2.LoginMiddleware)
-		userRouters.POST("/logout", userHttpHandler.Logout, middleware2.LoginMiddleware)
-		userRouters.DELETE("/", userHttpHandler.DeleteUser, middleware2.LoginMiddleware)
+		userRouters.GET("/", userHttpHandler.GetAllUsers, mymiddleware.LoginMiddleware)
+		userRouters.GET("/:id", userHttpHandler.GetUserInfoById, mymiddleware.LoginMiddleware)
+		userRouters.GET("/my", userHttpHandler.GetMyInfo, mymiddleware.LoginMiddleware)
+		userRouters.PATCH("/update", userHttpHandler.UpdateUserInfo, mymiddleware.LoginMiddleware)
+		userRouters.PATCH("/password", userHttpHandler.ChangePassword, mymiddleware.LoginMiddleware)
+		userRouters.POST("/logout", userHttpHandler.Logout, mymiddleware.LoginMiddleware)
+		userRouters.DELETE("/", userHttpHandler.DeleteUser, mymiddleware.LoginMiddleware)
 		userRouters.POST("/forgot-password", userHttpHandler.ForgotPassword)
 		userRouters.POST("/reset-password", userHttpHandler.ResetPassword)
 	}
@@ -107,11 +108,13 @@ func (s *echoServer) initializePostHttpHandler() {
 	postHttpHandler := postHandlers.NewPostHttpHandler(postUseCase)
 
 	postRouters := s.app.Group("/v2/posts")
-	postRouters.POST("/", postHttpHandler.CreatePost, middleware2.LoginMiddleware)
-	postRouters.GET("/:id", postHttpHandler.GetPostById)
-	postRouters.GET("/", postHttpHandler.GetFilteredPosts)
-	postRouters.GET("/my", postHttpHandler.GetMyPosts, middleware2.LoginMiddleware)
-	postRouters.PATCH("/:id", postHttpHandler.UpdatePost, middleware2.LoginMiddleware)
-	postRouters.DELETE("/:id", postHttpHandler.DeletePost, middleware2.LoginMiddleware)
+	{
+		postRouters.POST("/", postHttpHandler.CreatePost, mymiddleware.LoginMiddleware)
+		postRouters.GET("/:id", postHttpHandler.GetPostById)
+		postRouters.GET("/", postHttpHandler.GetFilteredPosts)
+		postRouters.GET("/my", postHttpHandler.GetMyPosts, mymiddleware.LoginMiddleware)
+		postRouters.PATCH("/:id", postHttpHandler.UpdatePost, mymiddleware.LoginMiddleware)
+		postRouters.DELETE("/:id", postHttpHandler.DeletePost, mymiddleware.LoginMiddleware)
+	}
 
 }

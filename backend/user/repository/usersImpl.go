@@ -21,8 +21,8 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
-func (m *userRepository) Insert(user *entity.User) error {
-	result := m.DB.GetDb().Create(user).Scan(user)
+func (r *userRepository) Insert(user *entity.User) error {
+	result := r.DB.GetDb().Create(user).Scan(user)
 	if result.Error != nil {
 		switch {
 		case result.Error.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
@@ -34,10 +34,19 @@ func (m *userRepository) Insert(user *entity.User) error {
 	return nil
 }
 
-func (m *userRepository) GetByID(id int64) (*entity.User, error) {
+func (r *userRepository) GetAll() ([]*entity.User, error) {
+	var users []*entity.User
+	result := r.DB.GetDb().Find(&users)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
+
+func (r *userRepository) GetByID(id int64) (*entity.User, error) {
 	var user entity.User
 
-	result := m.DB.GetDb().First(&user, id)
+	result := r.DB.GetDb().First(&user, id)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -49,10 +58,10 @@ func (m *userRepository) GetByID(id int64) (*entity.User, error) {
 	return &user, nil
 }
 
-func (m *userRepository) GetByEmail(email string) (*entity.User, error) {
+func (r *userRepository) GetByEmail(email string) (*entity.User, error) {
 	var user entity.User
 
-	result := m.DB.GetDb().Where("email = ?", email).First(&user)
+	result := r.DB.GetDb().Where("email = ?", email).First(&user)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -63,19 +72,19 @@ func (m *userRepository) GetByEmail(email string) (*entity.User, error) {
 	return &user, nil
 }
 
-func (m *userRepository) Update(user *entity.User) error {
-	result := m.DB.GetDb().Save(user)
+func (r *userRepository) Update(user *entity.User) error {
+	result := r.DB.GetDb().Save(user)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (m *userRepository) GetForToken(tokenScope, tokenPlaintext string) (*entity.User, error) {
+func (r *userRepository) GetForToken(tokenScope, tokenPlaintext string) (*entity.User, error) {
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
 
 	var user entity.User
-	result := m.DB.GetDb().Joins("INNER JOIN tokens ON users.id = tokens.user_id").
+	result := r.DB.GetDb().Joins("INNER JOIN tokens ON users.id = tokens.user_id").
 		Where("tokens.hash = ?", tokenHash[:]).
 		Where("tokens.scope = ?", tokenScope).
 		Where("tokens.expiry > ?", time.Now()).
@@ -91,10 +100,10 @@ func (m *userRepository) GetForToken(tokenScope, tokenPlaintext string) (*entity
 	return &user, nil
 }
 
-func (m *userRepository) Delete(id int64) error {
+func (r *userRepository) Delete(id int64) error {
 	user := entity.User{ID: id}
 
-	result := m.DB.GetDb().Delete(&user)
+	result := r.DB.GetDb().Delete(&user)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

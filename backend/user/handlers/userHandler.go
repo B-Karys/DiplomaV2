@@ -7,6 +7,7 @@ type UserHandler interface {
 	Activation(c echo.Context) error
 	Authentication(c echo.Context) error
 	CheckAuth(c echo.Context) error
+	GetAllUsers(c echo.Context) error
 	GetUserInfoByEmail(c echo.Context) error
 	GetUserInfoById(c echo.Context) error
 	GetMyInfo(c echo.Context) error

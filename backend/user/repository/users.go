@@ -6,6 +6,7 @@ import (
 
 type UserRepository interface {
 	Insert(user *entity.User) error
+	GetAll() ([]*entity.User, error)
 	GetByID(id int64) (*entity.User, error)
 	GetByEmail(email string) (*entity.User, error)
 	Update(user *entity.User) error

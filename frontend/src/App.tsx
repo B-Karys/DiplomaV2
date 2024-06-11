@@ -1,3 +1,5 @@
+import '@mantine/core/styles.css';
+import "./styles/navbar.module.css";
 import {BrowserRouter as Router, Routes, Route, Navigate, useParams} from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 import { Authentication } from './pages/authentication';
@@ -8,10 +10,10 @@ import { AuthProvider, useAuth } from './context/authContext';
 import { Navbar } from "./components/navbar";
 import { MyPosts } from "./pages/my-posts.tsx";
 import { ManagePost } from "./pages/manage-post";
+import { HRPage } from "./pages/hrpage.tsx";
 import  { CreatePost } from "./pages/create-post";
 
-import '@mantine/core/styles.css';
-import "./styles/navbar.module.css";
+
 import  { ManageProfile } from "./pages/manage-profile.tsx";
 import  { ChangePassword } from "./pages/change-password.tsx";
 import  { ForgotPassword } from "./pages/forgot-password.tsx";
@@ -28,6 +30,7 @@ export default function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<AuthenticationRoute />} />
                         <Route path="/register" element={<RegistrationRoute />} />
+                        <Route path="/hr/users" element={<HRPageRoute /> } />
                         <Route path="/profile/my" element={<MyProfileRoute />} />
                         <Route path="/profile/settings" element={<ManageProfileRoute />} />
                         <Route path="/posts" element={<MyPostsRoute />} />
@@ -54,6 +57,11 @@ const AuthenticationRoute = () => {
 const RegistrationRoute = () => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <Navigate to="/" /> : <Registration />;
+};
+
+const HRPageRoute = () => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <HRPage /> : <Navigate to="/login" />;
 };
 
 const MyPostsRoute = () => {

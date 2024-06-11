@@ -23,6 +23,14 @@ type userUseCaseImpl struct {
 	tokenRepo tokenRepository.TokenRepository
 }
 
+func (u *userUseCaseImpl) GetAllUsers() ([]*entity.User, error) {
+	users, err := u.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 var (
 	TokenCreationFailed = errors.New("Token creation failed")
 	ErrWrongPassword    = errors.New("Wrong password")

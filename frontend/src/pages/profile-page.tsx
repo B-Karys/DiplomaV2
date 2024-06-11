@@ -76,7 +76,8 @@ export function ProfilePage({ userId }: ProfilePageProps) {
             const response = await axios.get<Post[]>(`http://localhost:4000/v2/posts/?author=${userId}`, {
                 withCredentials: true,
             });
-            setPosts(response.data.posts); // Assuming the response has a "posts" field
+            // @ts-ignore
+            setPosts(response.data.posts);
             setPostsLoading(false);
         } catch (error) {
             setPostsLoading(false);

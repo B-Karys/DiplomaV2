@@ -9,6 +9,7 @@ import (
 	"DiplomaV2/backend/user/usecase"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"net/http"
@@ -210,6 +211,40 @@ func (u *userHttpHandler) ChangePassword(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Password updated successfully")
 }
 
+func (u *userHttpHandler) GetAllUsers(c echo.Context) error {
+	type UserInfo struct {
+		ID       int64          `json:"id"`
+		Name     string         `json:"name"`
+		Surname  string         `json:"surname"`
+		Username string         `json:"username"`
+		Telegram string         `json:"telegram"`
+		Discord  string         `json:"discord"`
+		Email    string         `json:"email"`
+		Skills   pq.StringArray `json:"skills"`
+	}
+
+	users, err := u.userUseCase.GetAllUsers()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	var usersInfo []UserInfo
+	for _, user := range users {
+		userInfo := UserInfo{
+			ID:       user.ID,
+			Name:     user.Name,
+			Surname:  user.Surname,
+			Username: user.Username,
+			Telegram: user.Telegram,
+			Discord:  user.Discord,
+			Email:    user.Email,
+			Skills:   user.Skills,
+		}
+		usersInfo = append(usersInfo, userInfo)
+	}
+
+	return c.JSON(http.StatusOK, usersInfo)
+}
 func (u *userHttpHandler) Registration(c echo.Context) error {
 	var input struct {
 		Name     string `json:"name"`

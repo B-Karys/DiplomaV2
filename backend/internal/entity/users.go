@@ -12,7 +12,7 @@ type User struct {
 	CreatedAt    time.Time      `gorm:"not null;default:current_timestamp" json:"created_at"`
 	Name         string         `gorm:"not null" json:"name"`
 	Surname      string         `json:"surname"`
-	Username     string         `gorm:"unique; not null" json:"username"`
+	Username     string         `gorm:"unique;not null" json:"username"`
 	Telegram     string         `json:"telegram"`
 	Discord      string         `json:"discord"`
 	Email        string         `gorm:"type:citext;unique;not null" json:"email"`
