@@ -23,9 +23,9 @@ interface Metadata {
 
 export function Home() {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [metadata, setMetadata] = useState<Metadata>({current_page: 1, page_size: 20, total_records: 0});
+    const [metadata, setMetadata] = useState<Metadata>({ current_page: 1, page_size: 10, total_records: 0 });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setError] = useState<string | null>(null);
     const [type, setType] = useState<string>('');
     const [skills, setSkills] = useState<string[]>([]);
     const [sort, setSort] = useState<string>('created_at');
@@ -42,12 +42,17 @@ export function Home() {
 
             const response = await axios.get<{ posts: Post[]; metadata: Metadata }>(`http://localhost:4000/v2/posts/?${params.toString()}`);
 
-            if (response.data.posts.length === 0) {
-                setError('There are no posts at the moment.');
+            const { posts, metadata } = response.data;
+
+            // Handle case where posts array is empty
+            if (posts.length === 0) {
+                setPosts([]);
+                setMetadata({current_page: 1, page_size: 10, total_records: 0});
             } else {
-                setPosts(response.data.posts);
-                setMetadata(response.data.metadata);
+                setPosts(posts);
+                setMetadata(metadata);
             }
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setError(error.message);
@@ -58,7 +63,6 @@ export function Home() {
             setLoading(false);
         }
     };
-
 
     useEffect(() => {
         fetchPosts(type, skills, sort, metadata.current_page);
@@ -73,11 +77,10 @@ export function Home() {
     const totalPages = Math.ceil(metadata.total_records / metadata.page_size);
 
     const onPageChange = (page: number) => {
-        setMetadata(prevMetadata => ({...prevMetadata, current_page: page}));
+        setMetadata(prevMetadata => ({ ...prevMetadata, current_page: page }));
     };
 
     if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error loading posts: {error}</div>;
 
     return (
         <div className="home-myContainer">
@@ -91,7 +94,7 @@ export function Home() {
             </div>
             <div className="home-posts-container">
                 {posts.length === 0 ? (
-                    <div>There are no posts at the moment.</div>
+                    <div>There are no posts matching the current filters.</div>
                 ) : (
                     posts.map(post => (
                         <div key={post.id} className="home-post">

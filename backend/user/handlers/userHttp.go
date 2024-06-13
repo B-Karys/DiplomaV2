@@ -95,7 +95,29 @@ func (u *userHttpHandler) GetMyInfo(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, user)
+	responseUser := struct {
+		ID           int64    `json:"id"`
+		Name         string   `json:"name"`
+		Surname      string   `json:"surname"`
+		Username     string   `json:"username"`
+		Telegram     string   `json:"telegram"`
+		Discord      string   `json:"discord"`
+		Skills       []string `json:"skills"`
+		Email        string   `json:"email"`
+		ProfileImage string   `json:"profileImage"`
+	}{
+		ID:           user.ID,
+		Name:         user.Name,
+		Surname:      user.Surname,
+		Username:     user.Username,
+		Telegram:     user.Telegram,
+		Discord:      user.Discord,
+		Skills:       user.Skills,
+		Email:        user.Email,
+		ProfileImage: user.ProfileImage,
+	}
+
+	return c.JSON(http.StatusOK, responseUser)
 }
 
 func (u *userHttpHandler) CheckAuth(c echo.Context) error {
@@ -319,7 +341,29 @@ func (u *userHttpHandler) GetUserInfoById(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-	return c.JSON(http.StatusOK, user)
+
+	// Create a response user object excluding 'CreatedAt' and 'Email'
+	responseUser := struct {
+		ID           int64    `json:"id"`
+		Name         string   `json:"name"`
+		Surname      string   `json:"surname"`
+		Username     string   `json:"username"`
+		Telegram     string   `json:"telegram"`
+		Discord      string   `json:"discord"`
+		Skills       []string `json:"skills"`
+		ProfileImage string   `json:"profileImage"`
+	}{
+		ID:           user.ID,
+		Name:         user.Name,
+		Surname:      user.Surname,
+		Username:     user.Username,
+		Telegram:     user.Telegram,
+		Discord:      user.Discord,
+		Skills:       user.Skills,
+		ProfileImage: user.ProfileImage,
+	}
+
+	return c.JSON(http.StatusOK, responseUser)
 }
 
 func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {

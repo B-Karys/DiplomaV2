@@ -79,11 +79,11 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 
 func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 	var input struct {
-		Name        string
-		Description string
-		AuthorID    int64
-		PostType    string
-		Skills      []string
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		AuthorID    int64    `json:"author_id"`
+		PostType    string   `json:"type"`
+		Skills      []string `json:"skills"`
 		postsFilter.Filters
 	}
 
@@ -175,10 +175,10 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	userID := c.Get("userID").(int64)
 
 	var input struct {
-		Name        string
-		Description string
-		PostType    string
-		Skills      []string
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		PostType    string   `json:"type"`
+		Skills      []string `json:"skills"`
 	}
 
 	if err := c.Bind(&input); err != nil {
@@ -203,10 +203,10 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 
 func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 	var input struct {
-		Name        string
-		Description string
-		PostType    string
-		Skills      []string
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		PostType    string   `json:"type"`
+		Skills      []string `json:"skills"`
 	}
 
 	if err := c.Bind(&input); err != nil {
