@@ -219,7 +219,6 @@ func (u *userHttpHandler) GetAllUsers(c echo.Context) error {
 		Username string         `json:"username"`
 		Telegram string         `json:"telegram"`
 		Discord  string         `json:"discord"`
-		Email    string         `json:"email"`
 		Skills   pq.StringArray `json:"skills"`
 	}
 
@@ -237,7 +236,6 @@ func (u *userHttpHandler) GetAllUsers(c echo.Context) error {
 			Username: user.Username,
 			Telegram: user.Telegram,
 			Discord:  user.Discord,
-			Email:    user.Email,
 			Skills:   user.Skills,
 		}
 		usersInfo = append(usersInfo, userInfo)

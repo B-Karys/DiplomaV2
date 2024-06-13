@@ -21,7 +21,6 @@ interface User {
     username: string;
     telegram: string;
     discord: string;
-    email: string;
     skills: string[];
 }
 
@@ -54,9 +53,12 @@ function filterData(data: User[], search: string) {
     const query = search.toLowerCase().trim();
     return data.filter((item) =>
         Object.keys(item).some((key) => {
+            // @ts-ignore
             if (Array.isArray(item[key])) {
+                // @ts-ignore
                 return item[key].join(',').toLowerCase().includes(query);
             }
+            // @ts-ignore
             return item[key].toString().toLowerCase().includes(query);
         })
     );
@@ -125,7 +127,6 @@ export function HRPage() {
             </Table.Td>
             <Table.Td>{row.telegram}</Table.Td>
             <Table.Td>{row.discord}</Table.Td>
-            <Table.Td>{row.email}</Table.Td>
             <Table.Td>{row.skills.join(', ')}</Table.Td>
         </Table.Tr>
     ));
@@ -178,13 +179,6 @@ export function HRPage() {
                                     onSort={() => setSorting('discord')}
                                 >
                                     Discord
-                                </Th>
-                                <Th
-                                    sorted={sortBy === 'email'}
-                                    reversed={reverseSortDirection}
-                                    onSort={() => setSorting('email')}
-                                >
-                                    Email
                                 </Th>
                                 <Th
                                     sorted={sortBy === 'skills'}
