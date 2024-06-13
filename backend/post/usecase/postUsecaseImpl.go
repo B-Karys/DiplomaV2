@@ -12,7 +12,7 @@ type postUseCaseImpl struct {
 }
 
 var (
-	ErrorFailedPostFalidation = errors.New("Post doesn't belong to this user")
+	ErrorFailedPostValidation = errors.New("Post doesn't belong to this user")
 )
 
 func NewPostUseCase(repository repository.PostRepository) PostUseCase {
@@ -45,33 +45,32 @@ func (p *postUseCaseImpl) DeletePost(id int64) error {
 	return nil
 }
 
-func (p *postUseCaseImpl) UpdatePost(postID, userID int64, name string, description string, skills []string, postType string) error {
-
+func (p *postUseCaseImpl) UpdatePost(postID, userID int64, updatedPost *entity.Post) error {
 	thePost, err := p.Repo.GetByID(postID)
 	if err != nil {
 		return err
 	}
 
 	if thePost.AuthorID != userID {
-		return ErrorFailedPostFalidation
+		return ErrorFailedPostValidation
 	}
 
-	thePost.Name = name
-	thePost.Description = description
-	thePost.Type = postType
-	thePost.Skills = skills
-	thePost.Version = thePost.Version + 1
+	thePost.Name = updatedPost.Name
+	thePost.Description = updatedPost.Description
+	thePost.Type = updatedPost.Type
+	thePost.Skills = updatedPost.Skills
+	thePost.Version += 1
 
 	err = p.Repo.Update(thePost)
 	if err != nil {
 		return err
 	}
 
-	return err
+	return nil
 }
 
-func (p *postUseCaseImpl) GetFilteredPosts(name, description, author, postType string, skills []string, filters post.Filters) ([]*entity.Post, post.Metadata, error) {
-	filteredPosts, metadata, err := p.Repo.GetFilteredPosts(name, description, author, postType, skills, filters)
+func (p *postUseCaseImpl) GetFilteredPosts(post *entity.Post, filters postsFilter.Filters) ([]*entity.Post, postsFilter.Metadata, error) {
+	filteredPosts, metadata, err := p.Repo.GetFilteredPosts(post, filters)
 	if err != nil {
 		return nil, metadata, err
 	}

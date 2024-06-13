@@ -331,16 +331,14 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to parse form data"})
 	}
 
+	userID := c.Get("userID").(int64)
+
 	name := form.Value["name"][0]
 	surname := form.Value["surname"][0]
 	username := form.Value["username"][0]
 	telegram := form.Value["telegram"][0]
 	discord := form.Value["discord"][0]
 	skills := form.Value["skills"]
-	fmt.Println(form.Value["name"], form.Value["username"])
-	fmt.Println("Received data:", name, surname, username, telegram, discord, skills)
-
-	userID := c.Get("userID").(int64)
 
 	profileImage := form.File["profileImage"]
 	var profileImageURL string
@@ -354,7 +352,19 @@ func (u *userHttpHandler) UpdateUserInfo(c echo.Context) error {
 		}
 	}
 
-	err = u.userUseCase.UpdateUserInfo(userID, name, surname, username, telegram, discord, skills, profileImageURL)
+	// Create user entity with updated information
+	user := &entity.User{
+		ID:           userID,
+		Name:         name,
+		Surname:      surname,
+		Username:     username,
+		Telegram:     telegram,
+		Discord:      discord,
+		Skills:       skills,
+		ProfileImage: profileImageURL, // Assuming this is the URL of the uploaded image
+	}
+
+	err = u.userUseCase.UpdateUserInfo(user)
 	if err != nil {
 		fmt.Println("Error updating user info:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})

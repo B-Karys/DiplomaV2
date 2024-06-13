@@ -109,25 +109,25 @@ func (u *userUseCaseImpl) Registration(user *entity.User) (*entity.Token, error)
 	return token, nil
 }
 
-func (u *userUseCaseImpl) UpdateUserInfo(userID int64, name, surname, username, telegram, discord string, skills []string, profileImage string) error {
-	user, err := u.repo.GetByID(userID)
+func (u *userUseCaseImpl) UpdateUserInfo(user *entity.User) error {
+	existingUser, err := u.repo.GetByID(user.ID)
 	if err != nil {
 		return err
 	}
 
-	user.Name = name
-	user.Surname = surname
-	user.Username = username
-	user.Telegram = telegram
-	user.Discord = discord
-	user.Skills = skills
-	user.Version = user.Version + 1
+	existingUser.Name = user.Name
+	existingUser.Surname = user.Surname
+	existingUser.Username = user.Username
+	existingUser.Telegram = user.Telegram
+	existingUser.Discord = user.Discord
+	existingUser.Skills = user.Skills
+	existingUser.Version++
 
-	if profileImage != "" {
-		user.ProfileImage = profileImage
+	if user.ProfileImage != "" {
+		existingUser.ProfileImage = user.ProfileImage
 	}
 
-	err = u.repo.Update(user)
+	err = u.repo.Update(existingUser)
 	if err != nil {
 		return err
 	}

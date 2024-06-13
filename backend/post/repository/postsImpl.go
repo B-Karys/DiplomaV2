@@ -3,7 +3,7 @@ package repository
 import (
 	"DiplomaV2/backend/internal/database"
 	"DiplomaV2/backend/internal/entity"
-	"DiplomaV2/backend/post"
+	postsFilter "DiplomaV2/backend/post"
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -19,28 +19,28 @@ func NewPostRepository(db database.Database) PostRepository {
 	return &postRepository{DB: db}
 }
 
-func (m *postRepository) Insert(post *entity.Post) error {
-	result := m.DB.GetDb().Create(post)
+func (r *postRepository) Insert(post *entity.Post) error {
+	result := r.DB.GetDb().Create(post)
 	return result.Error
 }
 
-func (m *postRepository) GetByID(postID int64) (*entity.Post, error) {
-	var thePost entity.Post
-	if err := m.DB.GetDb().Where("id = ?", postID).First(&thePost).Error; err != nil {
+func (r *postRepository) GetByID(postID int64) (*entity.Post, error) {
+	var post entity.Post
+	if err := r.DB.GetDb().Where("id = ?", postID).First(&post).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("thePost not found")
+			return nil, errors.New("post not found")
 		}
 		return nil, err
 	}
-	return &thePost, nil
+	return &post, nil
 }
 
-func (m *postRepository) Delete(id int64) error {
+func (r *postRepository) Delete(id int64) error {
 	if id < 1 {
 		return gorm.ErrRecordNotFound
 	}
 
-	result := m.DB.GetDb().Delete(&entity.Post{}, id)
+	result := r.DB.GetDb().Delete(&entity.Post{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -52,20 +52,20 @@ func (m *postRepository) Delete(id int64) error {
 	return nil
 }
 
-func (m *postRepository) Update(post *entity.Post) error {
-	result := m.DB.GetDb().Save(post)
+func (r *postRepository) Update(post *entity.Post) error {
+	result := r.DB.GetDb().Save(post)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (m *postRepository) DeleteAllForUser(userID int64) error {
+func (r *postRepository) DeleteAllForUser(userID int64) error {
 	if userID < 1 {
 		return gorm.ErrRecordNotFound
 	}
 
-	result := m.DB.GetDb().Where("author_id = ?", userID).Delete(&entity.Post{})
+	result := r.DB.GetDb().Where("author_id = ?", userID).Delete(&entity.Post{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -73,30 +73,30 @@ func (m *postRepository) DeleteAllForUser(userID int64) error {
 	return nil
 }
 
-func (m *postRepository) GetFilteredPosts(name, description, author, postType string, skills []string, filters post.Filters) ([]*entity.Post, post.Metadata, error) {
+func (r *postRepository) GetFilteredPosts(post *entity.Post, filters postsFilter.Filters) ([]*entity.Post, postsFilter.Metadata, error) {
 	var posts []*entity.Post
-	query := m.DB.GetDb().Model(&entity.Post{})
+	query := r.DB.GetDb().Model(&entity.Post{})
 
-	if name != "" {
-		query = query.Where("name ILIKE ?", "%"+name+"%")
+	if post.Name != "" {
+		query = query.Where("name ILIKE ?", "%"+post.Name+"%")
 	}
-	if description != "" {
-		query = query.Where("description ILIKE ?", "%"+description+"%")
+	if post.Description != "" {
+		query = query.Where("description ILIKE ?", "%"+post.Description+"%")
 	}
-	if author != "" {
-		query = query.Where("author_id = ?", author)
+	if post.AuthorID != 0 {
+		query = query.Where("author_id = ?", post.AuthorID)
 	}
-	if postType != "" {
-		query = query.Where("type = ?", postType)
+	if post.Type != "" {
+		query = query.Where("type = ?", post.Type)
 	}
-	if len(skills) > 0 {
-		query = query.Where("skills @> ?", pq.Array(skills))
+	if len(post.Skills) > 0 {
+		query = query.Where("skills @> ?", pq.Array(post.Skills))
 	}
 
 	var totalRecords int64
 	countQuery := *query
 	if err := countQuery.Count(&totalRecords).Error; err != nil {
-		return nil, post.Metadata{}, err
+		return nil, postsFilter.Metadata{}, err
 	}
 
 	if filters.Sort != "" && contains(filters.SortSafeList, filters.Sort) {
@@ -106,7 +106,7 @@ func (m *postRepository) GetFilteredPosts(name, description, author, postType st
 	query = query.Offset((filters.Page - 1) * filters.PageSize).Limit(filters.PageSize)
 
 	if err := query.Find(&posts).Error; err != nil {
-		return nil, post.Metadata{}, err
+		return nil, postsFilter.Metadata{}, err
 	}
 
 	metadata := calculateMetadata(int(totalRecords), filters.Page, filters.PageSize)
@@ -122,12 +122,11 @@ func contains(list []string, value string) bool {
 	return false
 }
 
-func calculateMetadata(totalRecords, page, pageSize int) post.Metadata {
+func calculateMetadata(totalRecords, page, pageSize int) postsFilter.Metadata {
 	if totalRecords == 0 {
-		// Note that we return an empty Metadata struct if there are no records.
-		return post.Metadata{}
+		return postsFilter.Metadata{}
 	}
-	return post.Metadata{
+	return postsFilter.Metadata{
 		CurrentPage:  page,
 		PageSize:     pageSize,
 		FirstPage:    1,

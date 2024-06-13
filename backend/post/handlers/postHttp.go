@@ -4,10 +4,9 @@ import (
 	"DiplomaV2/backend/internal/entity"
 	"DiplomaV2/backend/internal/helpers"
 	"DiplomaV2/backend/internal/validator"
-	"DiplomaV2/backend/post"
+	postsFilter "DiplomaV2/backend/post"
 	"DiplomaV2/backend/post/usecase"
 	"github.com/labstack/echo/v4"
-	"github.com/lib/pq"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,7 +25,7 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 		Author      string
 		PostType    string
 		Skills      []string
-		post.Filters
+		postsFilter.Filters
 	}
 
 	v := validator.New()
@@ -48,18 +47,26 @@ func (p *postHttpHandler) GetMyPosts(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if post.ValidateFilters(v, input.Filters); !v.Valid() {
+	if postsFilter.ValidateFilters(v, input.Filters); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	posts, metadata, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, input.Author, input.PostType, input.Skills, input.Filters)
+	post := entity.Post{
+		Name:        input.Name,
+		Description: input.Description,
+		Type:        input.PostType,
+		AuthorID:    userID,
+		Skills:      input.Skills,
+	}
+
+	posts, metadata, err := p.postUseCase.GetFilteredPosts(&post, input.Filters)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
 	type Response struct {
-		Posts    []*entity.Post `json:"posts"`
-		Metadata post.Metadata  `json:"metadata"`
+		Posts    []*entity.Post       `json:"posts"`
+		Metadata postsFilter.Metadata `json:"metadata"`
 	}
 
 	response := Response{
@@ -74,10 +81,10 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 	var input struct {
 		Name        string
 		Description string
-		Author      string
+		AuthorID    int64
 		PostType    string
 		Skills      []string
-		post.Filters
+		postsFilter.Filters
 	}
 
 	v := validator.New()
@@ -86,11 +93,8 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 
 	input.Name = helpers.ReadString(qs, "name", "")
 	input.Description = helpers.ReadString(qs, "description", "")
-
 	input.PostType = helpers.ReadString(qs, "type", "")
-
-	input.Author = helpers.ReadString(qs, "author", "")
-
+	input.AuthorID = int64(helpers.ReadInt(qs, "author", 0, v))
 	input.Skills = helpers.ReadCSV(qs, "skills", []string{})
 
 	input.Filters.Page = helpers.ReadInt(qs, "page", 1, v)
@@ -102,19 +106,26 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	if post.ValidateFilters(v, input.Filters); !v.Valid() {
+	if postsFilter.ValidateFilters(v, input.Filters); !v.Valid() {
 		return c.JSON(http.StatusBadRequest, v.Errors)
 	}
 
-	posts, metadata, err := p.postUseCase.GetFilteredPosts(input.Name, input.Description, input.Author, input.PostType, input.Skills, input.Filters)
+	post := entity.Post{
+		Name:        input.Name,
+		Description: input.Description,
+		AuthorID:    input.AuthorID,
+		Type:        input.PostType,
+		Skills:      input.Skills,
+	}
+
+	posts, metadata, err := p.postUseCase.GetFilteredPosts(&post, input.Filters)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	// Create a custom response struct
 	type Response struct {
-		Posts    []*entity.Post `json:"posts"`
-		Metadata post.Metadata  `json:"metadata"`
+		Posts    []*entity.Post       `json:"posts"`
+		Metadata postsFilter.Metadata `json:"metadata"`
 	}
 
 	response := Response{
@@ -126,7 +137,7 @@ func (p *postHttpHandler) GetFilteredPosts(c echo.Context) error {
 }
 
 func (p *postHttpHandler) DeletePost(c echo.Context) error {
-	userID := c.Get("userID")
+	userID := c.Get("userID").(int64)
 	postID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid post id"})
@@ -164,25 +175,25 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 	userID := c.Get("userID").(int64)
 
 	var input struct {
-		Name        string   `json:"name"`
-		Description string   `json:"description"`
-		Type        string   `json:"type"`
-		Skills      []string `json:"skills"`
+		Name        string
+		Description string
+		PostType    string
+		Skills      []string
 	}
 
 	if err := c.Bind(&input); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	post := &entity.Post{
+	post := entity.Post{
 		Name:        input.Name,
 		Description: input.Description,
-		Type:        strings.ToLower(input.Type),
+		Type:        strings.ToLower(input.PostType),
 		Skills:      input.Skills,
 		AuthorID:    userID,
 	}
 
-	err := p.postUseCase.CreatePost(post)
+	err := p.postUseCase.CreatePost(&post)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create post"})
 	}
@@ -192,10 +203,10 @@ func (p *postHttpHandler) CreatePost(c echo.Context) error {
 
 func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 	var input struct {
-		Name        string         `json:"name"`
-		Description string         `json:"description"`
-		Type        string         `json:"type"`
-		Skills      pq.StringArray `json:"skills"`
+		Name        string
+		Description string
+		PostType    string
+		Skills      []string
 	}
 
 	if err := c.Bind(&input); err != nil {
@@ -204,10 +215,20 @@ func (p *postHttpHandler) UpdatePost(c echo.Context) error {
 
 	postIDs := c.Param("id")
 	postID, err := strconv.ParseInt(postIDs, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid post id"})
+	}
 
 	authorID := c.Get("userID").(int64)
 
-	err = p.postUseCase.UpdatePost(postID, authorID, input.Name, input.Description, input.Skills, strings.ToLower(input.Type))
+	post := entity.Post{
+		Name:        input.Name,
+		Description: input.Description,
+		Type:        strings.ToLower(input.PostType),
+		Skills:      input.Skills,
+	}
+
+	err = p.postUseCase.UpdatePost(postID, authorID, &post)
 	if err != nil {
 		return c.JSON(http.StatusConflict, map[string]string{"error": err.Error()})
 	}

@@ -1,4 +1,4 @@
-package post
+package postsFilter
 
 import (
 	"DiplomaV2/backend/internal/validator"

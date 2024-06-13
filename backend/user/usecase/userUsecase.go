@@ -12,7 +12,7 @@ type UserUseCase interface {
 	GetAllUsers() ([]*entity.User, error)
 	GetUserById(id int64) (*entity.User, error)
 	GetUserByEmail(email string) (*entity.User, error)
-	UpdateUserInfo(int64, string, string, string, string, string, []string, string) error
+	UpdateUserInfo(user *entity.User) error
 	UploadProfileImage(userID int64, file *multipart.FileHeader) (string, error)
 	ChangePassword(userID int64, currentPassword, newPassword string) error
 	ForgotPassword(email string) (string, error)
